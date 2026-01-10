@@ -23,9 +23,11 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
+
 urlpatterns = [
     path('', views.home, name='home'),  # Главная
     path('admin/', admin.site.urls),
+    
     path('catalog/', include('catalog.urls', namespace='catalog')),  # Каталог на /catalog/
     path("orders/", include("orders.urls", namespace="orders")),
 

@@ -139,4 +139,24 @@
     }
 }
 </style>
+
+
+<script>
+    // Заменяем английские сообщения об ошибках на русские
+    document.addEventListener('DOMContentLoaded', function() {
+        // Находим все элементы с ошибками
+        const errorElements = document.querySelectorAll('.errorlist li');
+        
+        errorElements.forEach(element => {
+            const text = element.textContent;
+            
+            if (text.includes('Please enter a correct username and password')) {
+                element.textContent = 'Пожалуйста, введите правильные логин и пароль. Оба поля чувствительны к регистру.';
+            }
+            if (text.includes('inactive')) {
+                element.textContent = 'Этот аккаунт отключен.';
+            }
+        });
+    });
+    </script>
 {% endblock %}

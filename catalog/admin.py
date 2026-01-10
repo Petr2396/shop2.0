@@ -1,3 +1,4 @@
+
 from django.contrib import admin
 from .models import Product, ProductImage, Category
 
@@ -26,3 +27,6 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product', 'image', 'is_main')
+ 
+
+

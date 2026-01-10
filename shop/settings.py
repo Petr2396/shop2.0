@@ -8,29 +8,42 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
+
 """
 
-from pathlib import Path
 import os
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from pathlib import Path
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@gtvp0w-&_5kdng9fdy%7hb(7c2x5rzt)8-5luqgss0=t(zd5&'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-for-github-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-ALLOWED_HOSTS = []
+DEBUG = True
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.trycloudflare.com',
+    'http://*.trycloudflare.com',
+    'https://*.serveo.net',
+    'http://*.serveo.net',
+    'https://*.serveousercontent.com',
+    'http://*.serveousercontent.com',
+    'https://*.ngrok-free.app',
+    'http://*.ngrok-free.app',
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,16 +53,117 @@ INSTALLED_APPS = [
     'catalog',
      'orders', 
      "accounts",
+     'modeltranslation',
 ]
+
+
+
+LANGUAGE_CODE = 'ru-ru'
+TIME_ZONE = 'Europe/Moscow'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+# Настройки Jazzmin
+JAZZMIN_SETTINGS = {
+    # Тема сайта
+    "theme": "darkly",
+    
+    # Заголовки
+    "site_title": "🛍️ Магазин",
+    "site_header": "Административная панель",
+    "site_brand": "Магазин",
+    "welcome_sign": "Добро пожаловать в панель управления",
+    
+    # Авторские права
+    "copyright": "Ваш Магазин",
+    
+    # Поиск
+    "search_model": ["auth.User", "catalog.Product"],
+    
+    # Навигация
+    "navigation_expanded": True,
+    
+    # Иконки для приложений
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "catalog.Product": "fas fa-box",
+        "catalog.Category": "fas fa-folder",
+        "catalog.Order": "fas fa-shopping-cart",
+    },
+    
+    # Ссылки в верхнем меню
+    "topmenu_links": [
+        {"name": "Главная", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Сайт", "url": "/", "new_window": True},
+    ],
+    
+    # UI настройки
+    "show_ui_builder": True,  # Включить конструктор интерфейса
+    
+    # Изменение порядка приложений
+    "order_with_respect_to": ["auth", "catalog"],
+    
+    # Кастомные ссылки
+    "custom_links": {
+        "catalog": [{
+            "name": "Статистика", 
+            "url": "admin:catalog_statistics", 
+            "icon": "fas fa-chart-bar"
+        }]
+    },
+    
+    # Настройки для русского языка
+    "language": 'ru',
+}
+
+# Дополнительные настройки UI
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+}
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'payments.middleware.CloudflareMiddleware',
 ]
 
 ROOT_URLCONF = 'shop.urls'
@@ -78,10 +192,15 @@ WSGI_APPLICATION = 'shop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'shop_db'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'dev-password-only-for-github'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
+
 
 
 # Password validation
@@ -106,7 +225,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+
 
 TIME_ZONE = "Europe/Moscow"
 USE_TZ = True
@@ -125,8 +244,8 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-YOOKASSA_SHOP_ID = os.getenv('YOOKASSA_SHOP_ID', '1134879')
-YOOKASSA_API_KEY = os.getenv('YOOKASSA_API_KEY', 'test_aKm3MEreK4I3BXKuNB-v84XJ09UAyzOQKwLbyAzqaSg')
+YOOKASSA_SHOP_ID = os.getenv('YOOKASSA_SHOP_ID', '1243372')
+YOOKASSA_API_KEY = os.getenv('YOOKASSA_API_KEY', 'test_wQazi-bJGv1UyaUfb57gPBPJrj5rNgtKRs4DEowHPiU')
 
 
 import environ
@@ -137,8 +256,8 @@ env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("SECRET_KEY")
-DEBUG = env.bool("DEBUG", default=False)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+#DEBUG = env.bool("DEBUG", default=True)  # True по умолчанию!
+#ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=['*'])  # '*' по умолчанию!
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

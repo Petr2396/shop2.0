@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UserForm, ProfileForm
 from .forms import CustomUserCreationForm
+from django.contrib.auth.views import LoginView
 
 
 @login_required
@@ -53,3 +54,14 @@ def signup_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, "accounts/signup.html", {"form": form})
+
+
+class CustomLoginView(LoginView):
+    template_name = 'accounts/login.html'
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Просто меняем labels
+        form.fields['username'].label = 'Логин'
+        form.fields['password'].label = 'Пароль'
+        return form

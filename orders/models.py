@@ -17,15 +17,25 @@ class Order(models.Model):
     last_name = models.CharField(max_length=50)
     email = models.EmailField()
     address = models.CharField(max_length=250)
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='new')
+    status = models.CharField(max_length=50, choices=ORDER_STATUS_CHOICES, default='new')
     customer = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="orders", null=True, blank=True)
 
     is_paid = models.BooleanField(default=False, verbose_name="Оплачен")
+    
+    payment_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="ID платежа ЮKassa"
+    )
 
-    promo_code = models.CharField(max_length=20, blank=True, null=True, verbose_name="Промокод")
+    created = models.DateTimeField(auto_now_add=True)
+
+
+    promo_code = models.CharField(max_length=255, blank=True, null=True, verbose_name="Промокод")
     discount = models.IntegerField(default=0, verbose_name="Скидка %")
     total_with_discount = models.DecimalField(
         max_digits=10,
@@ -48,9 +58,22 @@ class Order(models.Model):
         return 0
 
     def get_final_total(self):
-        if self.total_with_discount:
+        """Возвращает сумму к оплате"""
+        # Если есть сумма со скидкой - используем её
+        if self.total_with_discount is not None:
+            print(f"📦 get_final_total: используем total_with_discount = {self.total_with_discount}")
             return self.total_with_discount
-        return self.get_total_cost()
+        
+        # Иначе считаем скидку на лету
+        total = self.get_total_cost()
+        if self.discount and self.discount > 0:
+            discount_amount = total * Decimal(self.discount) / 100
+            result = total - discount_amount
+            print(f"📦 get_final_total: расчет на лету: {total} - {discount_amount} = {result}")
+            return result
+        
+        print(f"📦 get_final_total: без скидки = {total}")
+        return total
     
     def has_return_request(self):
         """Проверяет, есть ли ЛЮБАЯ заявка на возврат для этого заказа"""
@@ -93,7 +116,7 @@ class OrderItem(models.Model):
 
 
 class PromoCode(models.Model):
-    code = models.CharField(max_length=20, unique=True, verbose_name="Промокод")
+    code = models.CharField(max_length=255, unique=True, verbose_name="Промокод")
     discount = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(100)],
         verbose_name="Скидка в %"
@@ -136,9 +159,9 @@ class ReturnRequest(models.Model):
     items = models.ManyToManyField("orders.OrderItem", related_name="returns")
     reason = models.TextField("Причина возврата")
     photo = models.ImageField(upload_to="returns/", blank=True, null=True)
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=255)
     email = models.EmailField()
-    status = models.CharField(max_length=20, choices=RETURN_STATUS_CHOICES, default="pending")
+    status = models.CharField(max_length=255, choices=RETURN_STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
