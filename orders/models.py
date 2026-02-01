@@ -32,7 +32,22 @@ class Order(models.Model):
         verbose_name="ID платежа ЮKassa"
     )
 
-    created = models.DateTimeField(auto_now_add=True)
+
+    DELIVERY_CHOICES = [
+        ('yandex', 'Яндекс Доставка'),
+        ('ozon', 'Ozon Доставка'),
+        ('post', 'Почта России'),
+        ('cdek', 'СДЭК'),
+    ]
+    
+    delivery_method = models.CharField(
+        max_length=20,
+        choices=DELIVERY_CHOICES,
+        default='courier',
+        verbose_name='Способ доставки'
+    )
+
+    
 
 
     promo_code = models.CharField(max_length=255, blank=True, null=True, verbose_name="Промокод")

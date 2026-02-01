@@ -1,0 +1,76 @@
+<!-- support/templates/support/admin_chat_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Чаты поддержки - Админка</title>
+    <meta http-equiv="refresh" content="15">
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #007bff; color: white; }
+        tr:hover { background: #f5f5f5; }
+        .new-messages { background: #dc3545; color: white; padding: 2px 6px; border-radius: 10px; font-size: 12px; }
+        .btn { background: #007bff; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; }
+        .auto-refresh { margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>📨 Чаты поддержки</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Пользователь</th>
+                <th>Сообщений</th>
+                <th>Последнее</th>
+                <th>Создан</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chat in chats %}
+            <tr>
+                <td><strong>#{{ chat.id }}</strong></td>
+                <td>
+                    <strong>{{ chat.user.username|default:"Аноним" }}</strong><br>
+                    <small>{{ chat.user.email|default:"" }}</small>
+                </td>
+                <td>
+                    {{ chat.total_count }}
+                    {% if chat.unread_count %}
+                    <span class="new-messages">{{ chat.unread_count }} нов.</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ chat.last_message }}<br>
+                    <small>{{ chat.last_message_time|date:"H:i" }}</small>
+                </td>
+                <td>{{ chat.created|date:"d.m.Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'admin_chat_detail' chat.id %}" class="btn">
+                        Открыть чат
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px;">
+                    Нет активных чатов
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="auto-refresh">
+        <small>Страница автоматически обновится через 15 секунд</small>
+        <button onclick="location.reload()" style="margin-left: 10px; padding: 5px 10px;">
+            🔄 Обновить сейчас
+        </button>
+        <a href="{% url 'admin:index' %}" style="margin-left: 10px;">← В админку</a>
+    </div>
+</body>
+</html>

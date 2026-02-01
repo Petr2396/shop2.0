@@ -2,17 +2,29 @@ from django import forms
 from .models import Order
 from .models import ReturnRequest, OrderItem
 
+# orders/forms.py
+# orders/forms.py
 class OrderCreateForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ["first_name", "last_name", "email", "address", "phone"]
+        fields = ["address", "delivery_method"]  # ← Добавил delivery_method
         labels = {
-            'first_name': 'Имя',
-            'last_name': 'Фамилия',
-            'email': 'Электронная почта',
             'address': 'Адрес доставки',
-            'phone': 'Телефон',
+            'delivery_method': 'Способ доставки',
         }
+        widgets = {
+            'delivery_method': forms.RadioSelect(),  # Радио-кнопки
+            # или forms.Select() для выпадающего списка
+        }
+    
+   
+    
+    
+    
+    
+
+
+    
 
 
 

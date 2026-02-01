@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+/* === SUPPORT CHAT (в стиле сайта) === */
+
+.support-chat {
+    max-width: 820px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* HEADER */
+.support-chat__header {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #ff7a00, #ff9a3c);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* MESSAGES AREA */
+.support-chat__messages {
+    flex: 1;
+    padding: 20px;
+    background: #f9f9f9;
+    overflow-y: auto;
+}
+
+/* MESSAGE BUBBLE */
+.support-message {
+    max-width: 72%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    word-wrap: break-word;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+/* CLIENT MESSAGE */
+.support-message.user {
+    background: linear-gradient(135deg, #ff7a00, #ff9a3c);
+    color: #fff;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+/* ADMIN MESSAGE */
+.support-message.admin {
+    background: #ffffff;
+    color: #333;
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+    border: 1px solid #eee;
+}
+
+/* TIME */
+.message-time {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: 6px;
+    text-align: right;
+}
+
+/* FORM */
+.support-chat__form {
+    display: flex;
+    gap: 10px;
+    padding: 14px;
+    border-top: 1px solid #eee;
+    background: #fff;
+}
+
+.support-chat__form input {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s ease;
+}
+
+.support-chat__form input:focus {
+    border-color: #ff7a00;
+}
+
+/* SEND BUTTON */
+.support-chat__form button {
+    padding: 12px 22px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ff7a00, #ff9a3c);
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.support-chat__form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(255,122,0,0.35);
+}
+
+.support-chat__form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* SCROLLBAR */
+.support-chat__messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.support-chat__messages::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.15);
+    border-radius: 3px;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="support-chat">
+    <div class="support-chat__header">
+        💬 Чат поддержки
+        <small id="connection-status" style="font-size: 0.7em; margin-left: 10px; color: #cce5ff;">
+            ● Подключено
+        </small>
+    </div>
+
+    <div class="support-chat__messages" id="messages-container">
+        {% for message in messages %}
+            <div class="support-message {% if message.is_from_admin %}admin{% else %}user{% endif %}" 
+                 data-id="{{ message.id }}">
+                {{ message.text }}
+                <div class="message-time">
+                    {{ message.created|date:"H:i" }}
+                    {% if message.is_from_admin %}👑{% else %}👤{% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <p>Напишите нам — мы скоро ответим 🙂</p>
+                <p><small>Это начало вашего диалога с поддержкой</small></p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <form method="post" class="support-chat__form" id="message-form">
+        {% csrf_token %}
+        <input type="text" 
+               name="text" 
+               id="message-input"
+               placeholder="Введите сообщение..." 
+               required
+               autocomplete="off"
+               maxlength="1000">
+        <button type="submit" id="send-button">Отправить</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class RealTimeChat {
+    constructor() {
+        this.messagesContainer = document.getElementById('messages-container');
+        this.messageForm = document.getElementById('message-form');
+        this.messageInput = document.getElementById('message-input');
+        this.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        this.lastMessageId = this.getLastMessageId();
+        this.isPolling = false;
+        this.pollAbortController = null;
+        
+        console.log('Чат реального времени запущен. Last ID:', this.lastMessageId);
+        this.init();
+    }
+    
+    getLastMessageId() {
+        const messages = this.messagesContainer.querySelectorAll('.support-message');
+        if (messages.length === 0) return 0;
+        return parseInt(messages[messages.length - 1].dataset.id) || 0;
+    }
+    
+    init() {
+    // Отправка сообщений
+    this.messageForm.addEventListener('submit', (e) => this.handleSend(e));
+
+    // Long polling для получения сообщений
+    this.startLongPolling();
+
+    // Прокрутка вниз: делаем несколько раз в разные моменты,
+    // чтобы гарантированно оказаться на последних сообщениях
+    this.scrollToBottom();                 // сразу
+    setTimeout(() => this.scrollToBottom(), 0);     // после текущего цикла
+    setTimeout(() => this.scrollToBottom(), 300);   // после подгрузки/пересчёта стилей
+    window.addEventListener('load', () => this.scrollToBottom()); // после полной загрузки
+
+    // Фокус
+    this.messageInput.focus();
+
+    console.log('Long polling запущен');
+}
+
+    
+    async handleSend(e) {
+        e.preventDefault();
+        
+        const text = this.messageInput.value.trim();
+        if (!text) return;
+        
+        // Блокируем интерфейс
+        const btn = this.messageForm.querySelector('button');
+        const originalText = btn.textContent;
+        btn.textContent = '⏳';
+        btn.disabled = true;
+        
+        try {
+            // Отправляем
+            await this.sendMessage(text);
+            
+            // Добавляем в чат
+            this.addMessage(text, false, 'temp-' + Date.now());
+            
+            // Очищаем поле
+            this.messageInput.value = '';
+            
+            // Перезапускаем long polling чтобы сразу получить ответ
+            this.restartPolling();
+            
+        } catch (error) {
+            console.error('Ошибка отправки:', error);
+            alert('Не удалось отправить сообщение');
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    }
+    
+    async sendMessage(text) {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ 'text': text })
+        });
+        
+        if (!response.ok) {
+            throw new Error('HTTP error ' + response.status);
+        }
+        
+        return response.json();
+    }
+    
+    startLongPolling() {
+        if (this.isPolling) return;
+        
+        this.isPolling = true;
+        this.pollAbortController = new AbortController();
+        
+        this.doLongPoll();
+    }
+    
+    async doLongPoll() {
+        const lastId = this.lastMessageId;
+        const url = `/support/api/chat/messages/?last_id=${lastId}&wait=true`;
+
+        
+        console.log('Long poll запрос, last_id:', lastId);
+        
+        try {
+            const response = await fetch(url, {
+                signal: this.pollAbortController.signal,
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+            }
+            
+            const data = await response.json();
+            
+            if (data.status === 'ok' && data.messages && data.messages.length > 0) {
+                console.log('Получены новые сообщения:', data.messages.length);
+                
+                data.messages.forEach(msg => {
+                    if (msg.id > this.lastMessageId) {
+                        this.addMessage(msg.text, msg.is_from_admin, msg.id);
+                        this.lastMessageId = msg.id;
+                        
+                        // Уведомление для сообщений от админа
+                        if (msg.is_from_admin) {
+                            this.showNotification('💬 Новое сообщение от поддержки!');
+                        }
+                    }
+                });
+            }
+            
+            // Сразу начинаем новый long poll
+            this.doLongPoll();
+            
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Long poll отменен');
+                return;
+            }
+            
+            console.error('Long poll ошибка:', error);
+            
+            // Повтор через 5 секунд при ошибке
+            setTimeout(() => {
+                this.isPolling = false;
+                this.startLongPolling();
+            }, 5000);
+        }
+    }
+    
+    restartPolling() {
+        if (this.pollAbortController) {
+            this.pollAbortController.abort();
+        }
+        this.isPolling = false;
+        setTimeout(() => this.startLongPolling(), 1000);
+    }
+    
+    addMessage(text, isFromAdmin, messageId) {
+        // Проверяем, нет ли уже такого сообщения
+        if (messageId && messageId.toString().startsWith('temp-')) {
+            // Ищем временное сообщение и заменяем его
+            const tempMsg = this.messagesContainer.querySelector(`[data-id="${messageId}"]`);
+            if (tempMsg) {
+                tempMsg.dataset.id = 'sent-' + Date.now();
+                return;
+            }
+        }
+        
+        const existing = this.messagesContainer.querySelector(`[data-id="${messageId}"]`);
+        if (existing) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `support-message ${isFromAdmin ? 'admin' : 'user'}`;
+        messageDiv.dataset.id = messageId;
+        
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        
+        messageDiv.innerHTML = `
+            ${this.escapeHtml(text)}
+            <div class="message-time">${timeStr} ${isFromAdmin ? '👑' : '👤'}</div>
+        `;
+        
+        // Анимация
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transform = 'translateY(10px)';
+        
+        this.messagesContainer.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.style.transition = 'all 0.3s ease';
+            messageDiv.style.opacity = '1';
+            messageDiv.style.transform = 'translateY(0)';
+        }, 10);
+        
+        this.scrollToBottom();
+    }
+    
+    scrollToBottom() {
+    const el = this.messagesContainer;
+    if (!el) return;
+
+    // Двойной requestAnimationFrame — самый надёжный способ
+    // дождаться реальной высоты контента после отрисовки
+    requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+        requestAnimationFrame(() => {
+            el.scrollTop = el.scrollHeight;
+        });
+    });
+}
+    
+    showNotification(message) {
+        // Простое уведомление
+        if (Notification.permission === 'granted') {
+            new Notification('Чат поддержки', {
+                body: message,
+                icon: '/static/favicon.ico'
+            });
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification('Чат поддержки', {
+                        body: message,
+                        icon: '/static/favicon.ico'
+                    });
+                }
+            });
+        }
+        
+        // Также звук
+        this.playNotificationSound();
+    }
+    
+    playNotificationSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ');
+            audio.volume = 0.3;
+            audio.play();
+        } catch (e) {}
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// Запускаем чат
+document.addEventListener('DOMContentLoaded', () => {
+    window.chat = new RealTimeChat();
+});
+</script>
+{% endblock %}

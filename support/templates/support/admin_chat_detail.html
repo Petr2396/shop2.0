@@ -1,0 +1,318 @@
+<!-- support/templates/support/admin_chat_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Чат с {{ chat.user.username }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .messages {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+        .message.admin {
+            background: #4CAF50;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .message.client {
+            background: #e9ecef;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        .form-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            border-radius: 0 0 8px 8px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            float: right;
+        }
+        .auto-refresh {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" data-chat-id="{{ chat.id }}">
+        <div class="header">
+            <h1>💬 Чат с {{ chat.user.username|default:"Клиентом" }}</h1>
+            <p>ID: #{{ chat.id }} | Email: {{ chat.user.email|default:"Не указан" }}</p>
+            <a href="{% url 'admin_chat_list' %}" style="color: white;">← Назад к списку чатов</a>
+        </div>
+
+        <div class="messages" id="messages">
+            {% for message in messages %}
+            <!-- ВАЖНО: data-id обязателен, иначе будут дубли -->
+            <div class="message {% if message.is_from_admin %}admin{% else %}client{% endif %}"
+                 data-id="{{ message.id }}">
+                {{ message.text }}
+                <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;">
+                    {{ message.created|date:"H:i" }}
+                    {% if message.is_from_admin %}👑{% else %}👤{% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 40px; color: #666;">
+                Нет сообщений в этом чате
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-container">
+            <form method="post" id="admin-message-form">
+                {% csrf_token %}
+                <textarea name="text" id="admin-message-text" placeholder="Введите ответ..." required></textarea>
+                <button type="submit" id="admin-send-btn">Отправить сообщение</button>
+                <div style="clear: both;"></div>
+            </form>
+        </div>
+
+        <div class="auto-refresh">
+            (Можно не нажимать — чат обновляется сам)
+            <button onclick="location.reload()" style="margin-left: 10px; padding: 5px 10px; font-size: 14px; background: #6c757d;">
+                🔄 Перезагрузить
+            </button>
+        </div>
+    </div>
+
+<script>
+class AdminChat {
+    constructor(chatId) {
+        this.chatId = String(chatId);
+        this.messagesContainer = document.getElementById('messages');
+        this.form = document.getElementById('admin-message-form');
+        this.textarea = document.getElementById('admin-message-text');
+        this.btn = document.getElementById('admin-send-btn');
+        this.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        this.lastMessageId = this.getLastMessageId();
+        this.abortController = null;
+
+        console.log('[AdminChat] start chatId=', this.chatId, 'lastMessageId=', this.lastMessageId);
+        this.init();
+    }
+
+    getLastMessageId() {
+        const items = this.messagesContainer.querySelectorAll('.message[data-id]');
+        if (!items.length) return 0;
+        const last = items[items.length - 1];
+        const id = parseInt(last.dataset.id, 10);
+        return Number.isFinite(id) ? id : 0;
+    }
+
+    init() {
+        this.form.addEventListener('submit', (e) => this.handleSend(e));
+        this.scrollToBottom();
+        this.textarea.focus();
+        this.startPolling();
+    }
+
+    async handleSend(e) {
+        e.preventDefault();
+        const text = this.textarea.value.trim();
+        if (!text) return;
+
+        const original = this.btn.textContent;
+        this.btn.textContent = '⏳';
+        this.btn.disabled = true;
+
+        try {
+            const res = await this.sendMessage(text);
+            if (res && res.status === 'ok' && res.message_id) {
+                // Не добавляем temp — просто ждём polling (он придёт сразу).
+                // Но чтобы обновление было мгновенным даже без ожидания polling:
+                this.addMessage(text, true, res.message_id);
+                this.lastMessageId = Math.max(this.lastMessageId, res.message_id);
+            }
+            this.textarea.value = '';
+
+            // Перезапускаем long-poll (чтобы “подхватить” возможные новые сообщения)
+            this.restartPolling();
+
+        } catch (err) {
+            console.error('[AdminChat] send error', err);
+            alert('Ошибка отправки');
+        } finally {
+            this.btn.textContent = original;
+            this.btn.disabled = false;
+        }
+    }
+
+    async sendMessage(text) {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ text })
+        });
+
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+    }
+
+    startPolling() {
+        if (this.abortController) return; // уже запущен
+        this.abortController = new AbortController();
+        this.doLongPoll();
+    }
+
+    restartPolling() {
+        if (this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+        }
+        // небольшая пауза, чтобы не зациклиться
+        setTimeout(() => this.startPolling(), 200);
+    }
+
+    async doLongPoll() {
+        if (!this.abortController) return;
+
+        const url = `/support/admin/api/chat/${this.chatId}/messages/?last_id=${this.lastMessageId}&wait=true`;
+
+        try {
+            const response = await fetch(url, {
+                signal: this.abortController.signal,
+                cache: 'no-store',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+
+            const data = await response.json();
+            if (data.status === 'ok' && Array.isArray(data.messages) && data.messages.length) {
+                let fromClient = 0;
+
+                for (const msg of data.messages) {
+                    if (msg.id > this.lastMessageId) {
+                        this.addMessage(msg.text, msg.is_from_admin, msg.id);
+                        this.lastMessageId = msg.id;
+                        if (!msg.is_from_admin) fromClient++;
+                    }
+                }
+
+                if (fromClient > 0) {
+                    this.playNotificationSound();
+                }
+            }
+
+            // следующий long-poll сразу
+            this.doLongPoll();
+
+        } catch (err) {
+            if (err.name === 'AbortError') return;
+            console.error('[AdminChat] poll error', err);
+
+            // повтор через 2 сек
+            setTimeout(() => this.doLongPoll(), 2000);
+        }
+    }
+
+    addMessage(text, isAdmin, messageId) {
+        // защита от дублей (работает, потому что в HTML есть data-id)
+        const existing = this.messagesContainer.querySelector(`.message[data-id="${messageId}"]`);
+        if (existing) return;
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isAdmin ? 'admin' : 'client'}`;
+        messageDiv.dataset.id = messageId;
+
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+
+        messageDiv.innerHTML = `
+            ${this.escapeHtml(text)}
+            <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;">
+                ${hh}:${mm} ${isAdmin ? '👑' : '👤'}
+            </div>
+        `;
+
+        this.messagesContainer.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+
+    scrollToBottom() {
+        setTimeout(() => {
+            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        }, 50);
+    }
+
+    playNotificationSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ');
+            audio.volume = 0.3;
+            audio.play();
+        } catch (e) {}
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const chatIdEl = document.querySelector('[data-chat-id]');
+    const chatId = chatIdEl ? chatIdEl.dataset.chatId : null;
+    if (chatId) window.adminChat = new AdminChat(chatId);
+});
+</script>
+</body>
+</html>

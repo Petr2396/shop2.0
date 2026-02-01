@@ -1,50 +1,325 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }}{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-6 d-flex flex-column align-items-center">
-        {% if product.images.all %}
-            <div class="main-image-wrapper mb-3" style=" width: 400px;  
-            height: 400px;        
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f9f9f9;  
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;  
-            ">
-                <img id="mainImage"
-                     src="{{ product.images.first.image.url }}"
-                     class="main-product-image" 
-                     alt="{{ product.name }}"
-                     style="
-                      width: 100%;
-                      height: 100%;
-                      object-fit: contain;
-                     ">
-            </div>
-            <div class="d-flex flex-wrap justify-content-center">
-                {% for image in product.images.all %}
-                    <img src="{{ image.image.url }}"
-                         class="img-thumbnail me-2 mb-2"
-                         style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
-                         onclick="document.getElementById('mainImage').src=this.src">
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-    <div class="col-md-6">
-        <h1>{{ product.name }}</h1>
-        <p>{{ product.description }}</p>
-        <h3>{{ product.price }} ₽</h3>
 
-        <form method="post" action="{% url 'orders:cart_add' product.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-warning">В корзину</button>
-        </form>
+<style>
+/* ===== scoped styles for product detail only ===== */
+.pd-wrap { --brand:#ff6a00; --text:#111827; --muted:#6b7280; --line:#e5e7eb; }
+
+.pd-wrap .review-box{
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+}
+
+.pd-wrap .review-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 12px;
+}
+.pd-wrap .review-head h3{ margin:0; font-weight:900; color: var(--text); }
+.pd-wrap .review-summary{
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pd-wrap .stars{ color: var(--brand); font-weight: 900; letter-spacing:1px; }
+.pd-wrap .stars-muted{ color:#d1d5db; letter-spacing:1px; }
+
+.pd-wrap .review-list{ display:grid; gap: 12px; margin-top: 12px; }
+.pd-wrap .review-item{
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #fff;
+}
+.pd-wrap .review-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.pd-wrap .review-user{
+  font-weight: 600;
+  color: var(--text);
+}
+.pd-wrap .review-date{
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.pd-wrap .review-text{
+  margin-top: 8px;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.pd-wrap .review-form{
+  margin-top: 14px;
+  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+}
+.pd-wrap .review-form .form-label{
+  font-weight: 500;
+  color: var(--text);
+}
+.pd-wrap .review-form textarea,
+.pd-wrap .review-form select{
+  border-radius: 12px;
+}
+.pd-wrap .review-form .btn-brand{
+  background: var(--brand);
+  color:#fff;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 500;
+  border: 0;
+}
+.pd-wrap .review-form .btn-brand:hover{ filter: brightness(.96); transform: translateY(-1px); }
+
+/* helper: show 1..5 stars based on rating */
+.pd-wrap .starline{ display:flex; align-items:center; gap:8px; margin-top: 2px; color: var(--muted); font-size:12px; }
+
+/* ===== Star picker (clickable) ===== */
+.pd-wrap .star-picker{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+.pd-wrap .star-row{
+  display:flex;
+  gap: 6px;
+}
+.pd-wrap .star-btn{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor:pointer;
+  font-size: 18px;
+  line-height: 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: .15s;
+  user-select:none;
+}
+.pd-wrap .star-btn:hover{ transform: translateY(-1px); border-color:#d1d5db; }
+.pd-wrap .star-btn.is-on{
+  border-color: rgba(255,106,0,.35);
+  background: rgba(255,106,0,.08);
+}
+.pd-wrap .star-btn .star{
+  color: #d1d5db; /* off */
+  font-weight: 500;
+}
+.pd-wrap .star-btn.is-on .star{
+  color: var(--brand); /* on */
+}
+.pd-wrap .star-hint{
+  font-size: 13px;
+  color: var(--muted);
+  min-width: 60px;
+}
+
+
+.pd-wrap .review-form textarea{
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block;
+  box-sizing: border-box;
+  min-height: 110px;
+  padding: 10px 12px;
+}
+
+</style>
+
+<div class="pd-wrap">
+  <div class="row">
+      <div class="col-md-6 d-flex flex-column align-items-center">
+          {% if product.images.all %}
+              <div class="main-image-wrapper mb-3" style=" width: 400px; height: 400px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+                  <img id="mainImage"
+                       src="{{ product.images.first.image.url }}"
+                       class="main-product-image"
+                       alt="{{ product.name }}"
+                       style="width: 100%; height: 100%; object-fit: contain;">
+              </div>
+              <div class="d-flex flex-wrap justify-content-center">
+                  {% for image in product.images.all %}
+                      <img src="{{ image.image.url }}"
+                           class="img-thumbnail me-2 mb-2"
+                           style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+                           onclick="document.getElementById('mainImage').src=this.src">
+                  {% endfor %}
+              </div>
+          {% endif %}
+      </div>
+
+      <div class="col-md-6">
+          <h1 class="mb-2">{{ product.name }}</h1>
+          <p class="text-muted">{{ product.description }}</p>
+          <h3 class="mb-3">{{ product.price }} ₽</h3>
+
+          <form method="post" action="{% url 'orders:cart_add' product.id %}" class="js-add-to-cart">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-warning">В корзину</button>
+          </form>
+      </div>
+  </div>
+
+  <div class="mt-4 review-box">
+    <div class="review-head">
+      <h3>Отзывы</h3>
+
+      {% if product.rating_count %}
+        <div class="review-summary">
+          <span class="stars">★★★★★</span>
+          <span style="color:#111827;font-weight:900;">{{ product.rating_avg|floatformat:1 }}</span>
+          <span>·</span>
+          <span>{{ product.rating_count }} шт.</span>
+        </div>
+      {% else %}
+        <div class="review-summary">Пока нет оценок</div>
+      {% endif %}
     </div>
+
+    {% if not reviews %}
+      <div class="text-muted">Отзывов пока нет. Будь первым 🙂</div>
+    {% else %}
+      <div class="review-list">
+        {% for r in reviews %}
+          <div class="review-item">
+            <div class="review-top">
+              <div>
+                <div class="review-user">{{ r.user }}</div>
+
+                <div class="starline">
+                  <span class="stars">
+                    {% if r.rating >= 1 %}★{% else %}☆{% endif %}
+                    {% if r.rating >= 2 %}★{% else %}☆{% endif %}
+                    {% if r.rating >= 3 %}★{% else %}☆{% endif %}
+                    {% if r.rating >= 4 %}★{% else %}☆{% endif %}
+                    {% if r.rating >= 5 %}★{% else %}☆{% endif %}
+                  </span>
+                  <span>{{ r.rating }}/5</span>
+                </div>
+              </div>
+
+              <div class="review-date">{{ r.created_at|date:"d.m.Y" }}</div>
+            </div>
+
+            {% if r.text %}
+              <div class="review-text">{{ r.text }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="review-form">
+      {% if user.is_authenticated %}
+        {% if can_review %}
+          <form method="post" action="{% url 'reviews:create_or_update' product.slug %}">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label">Оценка</label>
+
+              {# скрываем настоящий select, но он отправится в POST #}
+              <div style="display:none;">
+                {{ form.rating }}
+              </div>
+
+              <div class="star-picker" id="starPicker">
+                <div class="star-row" id="starRow">
+                  <button type="button" class="star-btn" data-value="1" aria-label="1 из 5"><span class="star">★</span></button>
+                  <button type="button" class="star-btn" data-value="2" aria-label="2 из 5"><span class="star">★</span></button>
+                  <button type="button" class="star-btn" data-value="3" aria-label="3 из 5"><span class="star">★</span></button>
+                  <button type="button" class="star-btn" data-value="4" aria-label="4 из 5"><span class="star">★</span></button>
+                  <button type="button" class="star-btn" data-value="5" aria-label="5 из 5"><span class="star">★</span></button>
+                </div>
+                <div class="star-hint" id="starHint">5/5</div>
+              </div>
+
+              {% if form.rating.errors %}
+                <div class="text-danger mt-2">{{ form.rating.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+  <label class="form-label d-block mb-2">Комментарий (необязательно)</label>
+
+  {{ form.text.as_widget|safe }}
+</div>
+
+            <button type="submit" class="btn-brand">Оставить отзыв</button>
+          </form>
+
+          <script>
+          (function() {
+            const select = document.querySelector('select[name="rating"]');
+            const row = document.getElementById('starRow');
+            const hint = document.getElementById('starHint');
+
+            if (!select || !row || !hint) return;
+
+            const clamp = (v) => Math.min(5, Math.max(1, v));
+
+            // initial: если вдруг пусто — ставим 5
+            function getInitial() {
+              const v = parseInt(select.value || '5', 10);
+              return clamp(v);
+            }
+
+            function paint(v) {
+              const value = clamp(parseInt(v, 10));
+              row.querySelectorAll('.star-btn').forEach(btn => {
+                const b = parseInt(btn.getAttribute('data-value'), 10);
+                btn.classList.toggle('is-on', b <= value);
+              });
+              hint.textContent = value + '/5';
+            }
+
+            function setRating(v) {
+              const value = clamp(parseInt(v, 10));
+              select.value = String(value);
+              paint(value);
+            }
+
+            // click
+            row.addEventListener('click', (e) => {
+              const btn = e.target.closest('.star-btn');
+              if (!btn) return;
+              setRating(btn.getAttribute('data-value'));
+            });
+
+            // hover preview
+            row.querySelectorAll('.star-btn').forEach(btn => {
+              btn.addEventListener('mouseenter', () => {
+                paint(btn.getAttribute('data-value'));
+              });
+            });
+            row.addEventListener('mouseleave', () => paint(getInitial()));
+
+            // init
+            setRating(getInitial());
+          })();
+          </script>
+
+        {% else %}
+          <div class="text-muted">Оставить отзыв могут только покупатели товара после доставки.</div>
+        {% endif %}
+      {% else %}
+        <div class="text-muted">Чтобы оставить отзыв — войдите в аккаунт.</div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
 {% endblock %}
-
