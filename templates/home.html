@@ -1,458 +1,393 @@
 {% extends "base.html" %}
-{% block title %}Главная - Огонь Жизни{% endblock %}
+{% block title %}Огонь Жизни — товары для уюта{% endblock %}
 
 {% block content %}
 <style>
-    /* === ОСНОВНЫЕ СТИЛИ === */
-    .hero-section {
-        background: linear-gradient(135deg, #fff6e9 0%, #ffedd1 100%);
-        padding: 6rem 1rem;
-        text-align: center;
-        border-radius: 24px;
-        margin: 2rem 0;
-        position: relative;
-        overflow: hidden;
-    }
+/* ========= СКОУП: чтобы не ломать остальной сайт ========= */
+.mp-home { --brand:#ff6a00; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --card:#fff; }
+.mp-home, .mp-home * { font-weight: 400; }
 
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: -30%;
-        right: -5%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, #ffb347 0%, transparent 70%);
-        opacity: 0.2;
-        border-radius: 50%;
-    }
 
-    .hero-section::after {
-        content: '';
-        position: absolute;
-        bottom: -20%;
-        left: -5%;
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(circle, #ff8c00 0%, transparent 70%);
-        opacity: 0.15;
-        border-radius: 50%;
-    }
+.mp-home .wrap { max-width: 1200px; margin: 0 auto; padding: 18px 14px 48px; }
 
-    .hero-title {
-        font-size: 4rem;
-        font-weight: 800;
-        color: #ff6a00;
-        margin-bottom: 1.5rem;
-        letter-spacing: -1px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-    }
+/* HERO */
+.mp-home .hero {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+.mp-home .hero-inner{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 18px;
+  padding: 22px;
+  align-items:center;
+}
+.mp-home .hero h1{
+  margin:0;
+  font-weight: 600;          /* было 900 */
+  letter-spacing: -.3px;
+  font-size: 34px;
+  color: var(--text);
+  line-height: 1.12;
+}
+.mp-home .hero h1 .accent{ color: var(--brand); font-weight: 600; }
+.mp-home .hero p{
+  margin: 10px 0 14px;
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 560px;
+}
 
-    .hero-subtitle {
-        font-size: 1.4rem;
-        color: #666;
-        margin-bottom: 3rem;
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.7;
-    }
+/* Search */
+.mp-home .search {
+  display:flex;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px;
+  background: #fff;
+  max-width: 720px;
+}
+.mp-home .search input{
+  border: 0;
+  outline: 0;
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+  min-width: 0;
+}
+.mp-home .search button{
+  border: 0;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-weight: 500;          /* было 800 */
+  cursor: pointer;
+  transition:.15s;
+}
+.mp-home .search button:hover{ filter: brightness(.96); transform: translateY(-1px); }
 
-    .cta-button {
-        display: inline-block;
-        background: linear-gradient(135deg, #ff6a00 0%, #ff8c00 100%);
-        color: white !important;
-        padding: 1.2rem 3rem;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 1.2rem;
-        transition: all 0.4s ease;
-        box-shadow: 0 6px 20px rgba(255, 106, 0, 0.3);
-        border: none;
-        cursor: pointer;
-        position: relative;
-        z-index: 1;
-    }
+/* Actions */
+.mp-home .hero-actions{ margin-top: 10px; display:flex; gap:10px; flex-wrap:wrap; }
+.mp-home .hero-actions a{
+  text-decoration:none;
+  font-weight: 500;          /* было 800 */
+  border-radius: 999px;
+  padding: 9px 12px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.mp-home .btn-solid{
+  background: var(--brand);
+  color:#fff;
+  box-shadow: 0 10px 20px rgba(255,106,0,.18);
+}
+.mp-home .btn-solid:hover{ filter: brightness(.97); transform: translateY(-1px); }
+.mp-home .btn-soft{
+  background:#fff;
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+.mp-home .btn-soft:hover{ transform: translateY(-1px); border-color:#d1d5db; }
 
-    .cta-button:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 10px 30px rgba(255, 106, 0, 0.5);
-        color: white !important;
-    }
+/* Sections */
+.mp-home .section { margin-top: 22px; }
+.mp-home .section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.mp-home .section-title h2{
+  margin:0;
+  font-size: 20px;
+  font-weight: 600;          /* было 900 */
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+.mp-home .section-title .hint{ color: var(--muted); font-size: 13px; }
 
-    /* === СЕКЦИИ === */
-    .section {
-        padding: 5rem 0;
-        text-align: center;
-    }
+/* Cards grid */
+.mp-home .grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
 
-    .section-title {
-        font-size: 3rem;
-        font-weight: 800;
-        color: #333;
-        margin-bottom: 3rem;
-        position: relative;
-    }
+.mp-home .p-card{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow:hidden;
+  transition:.18s;
+  display:flex;
+  flex-direction:column;
+  min-height: 350px;
+}
+.mp-home .p-card:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.08);
+  border-color:#d1d5db;
+}
+.mp-home .p-media{
+  position:relative;
+  height: 185px;
+  background: #f8fafc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.mp-home .p-media img{
+  width:100%;
+  height:100%;
+  object-fit: contain;
+}
+.mp-home .badge-hit{
+  position:absolute;
+  top: 12px; left: 12px;
+  background: #fff;
+  border: 1px solid rgba(255,106,0,.25);
+  color: var(--brand);
+  font-weight: 500;         /* было 900 */
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
 
-    .section-title::after {
-        content: '';
-        display: block;
-        width: 80px;
-        height: 5px;
-        background: linear-gradient(90deg, #ff6a00, #ffb347);
-        margin: 1.5rem auto;
-        border-radius: 3px;
-    }
+.mp-home .p-body{
+  padding: 12px 14px 14px;
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+  flex:1;
+}
+.mp-home .p-name{
+  font-weight: 500;         /* было 800 */
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.25;
+  min-height: 36px;
+}
+.mp-home .p-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.mp-home .p-price{
+  font-size: 18px;
+  font-weight: 600;         /* было 950 */
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+.mp-home .p-actions{
+  margin-top:auto;
+  display:flex;
+  gap: 10px;
+  align-items:center;
+}
 
-    /* === КАРТОЧКИ === */
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 2.5rem;
-        margin-top: 3rem;
-    }
+.mp-home .btn-detail{
+  flex:1;
+  border: 1px solid var(--line);
+  background:#fff;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-weight: 500;         /* было 900 */
+  text-decoration:none;
+  color: var(--text);
+  text-align:center;
+  transition:.15s;
+}
+.mp-home .btn-detail:hover{ transform: translateY(-1px); border-color:#d1d5db; }
 
-    .feature-card {
-        background: white;
-        padding: 3rem 2rem;
-        border-radius: 24px;
-        text-align: center;
-        transition: all 0.4s ease;
-        border: 2px solid transparent;
-        box-shadow: 0 8px 30px rgba(255, 165, 0, 0.1);
-        position: relative;
-        overflow: hidden;
-    }
+.mp-home .btn-cart{
+  width: 44px; height: 40px; /* чуть компактнее */
+  border:0;
+  border-radius: 999px;
+  background: var(--brand);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:.15s;
+}
+.mp-home .btn-cart:hover{ transform: translateY(-1px); filter: brightness(.96); }
 
-    .feature-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #ff6a00, #ffb347);
-    }
+/* Advantages */
+.mp-home .advantages{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.mp-home .adv{
+  background:#fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  display:flex;
+  gap: 12px;
+  align-items:flex-start;
+}
+.mp-home .adv-ico{
+  width: 44px; height: 44px;
+  border-radius: 16px;
+  background: rgba(255,106,0,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 20px;
+}
+.mp-home .adv h3{ margin:0; font-size: 14px; font-weight: 600; color: var(--text); } /* было 950 */
+.mp-home .adv p{ margin:4px 0 0; font-size: 13px; color: var(--muted); }
 
-    .feature-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 0 20px 50px rgba(255, 165, 0, 0.2);
-        border-color: #ff6a00;
-    }
+@media (max-width: 900px){
+  .mp-home .hero-inner{ grid-template-columns: 1fr; }
+  .mp-home .hero h1{ font-size: 30px; }
+}
+@media (max-width: 520px){
+  .mp-home .search{ flex-direction: column; border-radius: 16px; }
+  .mp-home .search button{ width:100%; }
+}
 
-    .feature-icon {
-        font-size: 4rem;
-        margin-bottom: 2rem;
-        color: #ff6a00;
-        background: linear-gradient(135deg, #fff0e0 0%, #ffe4cc 100%);
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: auto;
-        margin-right: auto;
-        transition: all 0.3s ease;
-    }
 
-    .feature-card:hover .feature-icon {
-        transform: scale(1.1) rotate(5deg);
-    }
 
-    .feature-title {
-        font-size: 1.7rem;
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 1.2rem;
-    }
+/* FIX Font Awesome inside mp-home (после reset'а) */
+.mp-home i.fa-solid,
+.mp-home i.fas {
+  font-weight: 900 !important;
+}
 
-    .feature-text {
-        color: #666;
-        line-height: 1.7;
-        font-size: 1.1rem;
-    }
-
-    /* === КАТЕГОРИИ === */
-    .categories-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
-    }
-
-    .category-card {
-        background: white;
-        padding: 2.5rem 2rem;
-        border-radius: 20px;
-        text-align: center;
-        transition: all 0.4s ease;
-        border: 2px solid #ffe4cc;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .category-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-        transition: left 0.6s ease;
-    }
-
-    .category-card:hover::before {
-        left: 100%;
-    }
-
-    .category-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 40px rgba(255, 165, 0, 0.15);
-        border-color: #ff6a00;
-    }
-
-    /* === ПОПУЛЯРНЫЕ ТОВАРЫ === */
-    .products-section {
-        padding: 2rem 0;
-    }
-
-    .products-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-    }
-
-    .product-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        min-height: 320px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    .product-image {
-        height: auto;
-        max-height: 200px;
-        width: auto;
-        max-width: 100%;
-        object-fit: contain;
-        margin: 0 auto;
-        display: block;
-    }
-
-    
-    .product-content {
-        padding: 1rem;
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-    }
-
-    .product-title {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #333;
-        line-height: 1.3;
-    }
-
-    .product-description {
-        font-size: 0.85rem;
-        color: #666;
-        line-height: 1.4;
-        margin-bottom: 0.75rem;
-        flex-grow: 1;
-    }
-
-    .product-price {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: #e74c3c;
-        margin-bottom: 0.75rem;
-    }
-
-    .product-button {
-        display: block;
-        width: 100%;
-        padding: 0.6rem;
-        background-color: #ff6a00;
-        color: white;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: background-color 0.3s;
-        border: none;
-        cursor: pointer;
-        margin-top: auto;
-    }
-
-    .product-button:hover {
-        background-color: #ff6a00da;
-        color: white;
-        text-decoration: none;
-    }
-
-    /* === СТАТИСТИКА === */
-    .stats-section {
-        background: linear-gradient(135deg, #ff6a00, #ff8c00);
-        color: white;
-        border-radius: 24px;
-        padding: 4rem 0;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 2rem;
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 3rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .stat-label {
-        font-size: 1.1rem;
-        opacity: 0.9;
-    }
-
-    /* === АДАПТИВНОСТЬ === */
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2.8rem;
-        }
-        
-        .hero-subtitle {
-            font-size: 1.2rem;
-        }
-        
-        .section-title {
-            font-size: 2.2rem;
-        }
-        
-        .features-grid,
-        .categories-grid,
-        .products-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .hero-section {
-            padding: 4rem 1rem;
-        }
-    }
 </style>
 
-<!-- ГЕРОЙ-СЕКЦИЯ -->
-<section class="hero-section">
-    <div class="container">
-        <h1 class="hero-title">Создавайте уют вместе с нами!</h1>
-        <p class="hero-subtitle">Эксклюзивные товары для дома, которые наполнят ваше пространство теплом, гармонией и неповторимой атмосферой комфорта</p>
-        <a href="/catalog/" class="cta-button">Открыть каталог</a>
-    </div>
-</section>
 
-<!-- ПОПУЛЯРНЫЕ ТОВАРЫ -->
-<section class="section products-section">
-    <div class="container">
-        <h2 class="section-title">Популярные товары</h2>
-        <div class="products-grid">
-            {% for product in featured_products %}
-            <div class="product-card">
-                <div class="product-image">
-                    {% if product.images.first %}
-                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
-                    {% else %}
-                        🏠
-                    {% endif %}
-                </div>
-                <div class="product-content">
-                    <h3 class="product-title">{{ product.name }}</h3>
-                    <p class="product-description">{{ product.description|truncatewords:12 }}</p>
-                    <div class="product-price">{{ product.price }} ₽</div>
-                    <a href="{% url 'catalog:product_detail' product.slug %}" class="product-button">Подробнее</a>
-                </div>
-            </div>
-            {% empty %}
-            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
-                <p style="font-size: 1.2rem; color: #666;">Товары скоро появятся!</p>
-            </div>
-            {% endfor %}
+<div class="mp-home">
+  <div class="wrap">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div>
+          <h1>Товары для <span class="accent">уюта</span> и атмосферы</h1>
+          <p>Свечи, декор и подарки — всё, что делает дом тёплым. Быстро найди нужное через поиск или категории.</p>
+
+          <form class="search" method="get" action="{% url 'catalog:product_list' %}">
+            {% if current_category %}
+              <input type="hidden" name="category" value="{{ current_category.slug }}">
+            {% endif %}
+            <input type="text" name="q" placeholder="Поиск: свечи, диффузоры, декор…" value="{{ request.GET.q|default_if_none:'' }}">
+            <button type="submit">Найти</button>
+          </form>
+
+          <div class="hero-actions">
+            <a href="/catalog/" class="btn-solid">Перейти в каталог →</a>
+            {% if current_category or request.GET.q %}
+              <a href="{% url 'catalog:product_list' %}" class="btn-soft">Сбросить фильтры</a>
+            {% else %}
+              <a href="#hits" class="btn-soft">Смотреть хиты</a>
+            {% endif %}
+          </div>
         </div>
-    </div>
-</section>
 
-<!-- ПРЕИМУЩЕСТВА -->
-<section class="section">
-    <div class="container">
-        <h2 class="section-title">Почему выбирают нас</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">⭐</div>
-                <h3 class="feature-title">Качество и надежность</h3>
-                <p class="feature-text">Тщательно отбираем каждый товар, чтобы вы получали только лучшее для своего дома</p>
+        
+      </div>
+    </section>
+
+    
+
+    <!-- ХИТЫ -->
+    <section class="section" id="hits">
+      <div class="section-title">
+        <h2>Хиты продаж</h2>
+        <div class="hint"><a href="/catalog/" style="color:#6b7280;text-decoration:none;">Все товары →</a></div>
+      </div>
+
+      <div class="grid">
+        {% for product in featured_products %}
+          <div class="p-card">
+            <div class="p-media">
+              <span class="badge-hit">Хит</span>
+              {% if product.images.first %}
+                <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+              {% else %}
+                <img src="/static/img/no-image.png" alt="Нет изображения">
+              {% endif %}
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🚚</div>
-                <h3 class="feature-title">Быстрая доставка</h3>
-                <p class="feature-text">Доставляем заказы по всей России в кратчайшие сроки с бережной упаковкой</p>
+
+            <div class="p-body">
+              <div class="p-name">{{ product.name }}</div>
+
+              <div class="p-meta">
+  {% if product.rating_count %}
+    <div>★ {{ product.rating_avg|floatformat:1 }} ({{ product.rating_count }})</div>
+  {% endif %}
+  <div>В наличии</div>
+</div>
+
+              <div class="p-price">{{ product.price }} ₽</div>
+
+              <div class="p-actions">
+                <a href="{% url 'catalog:product_detail' product.slug %}" class="btn-detail">Подробнее</a>
+
+                <form method="post" action="{% url 'orders:cart_add' product.id %}" class="js-add-to-cart">
+                  {% csrf_token %}
+                  <button class="btn-cart" aria-label="Добавить в корзину">
+  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M6 6h15l-2 8H8L6 6Z" />
+    <path d="M6 6 5 3H2" />
+    <circle cx="9" cy="20" r="1.5" />
+    <circle cx="18" cy="20" r="1.5" />
+  </svg>
+</button>
+                </form>
+              </div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">💝</div>
-                <h3 class="feature-title">Идеально для подарка</h3>
-                <p class="feature-text">Каждый товар - это продуманный подарок, который принесет радость вашим близким</p>
-            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- ПЛЮСЫ -->
+    <section class="section">
+      <div class="section-title">
+        <h2>Почему мы</h2>
+        
+      </div>
+
+      <div class="advantages">
+        <div class="adv">
+          <div class="adv-ico">⭐</div>
+          <div>
+            <h3>Проверенное качество</h3>
+            <p>Отборные материалы и аккуратная упаковка.</p>
+          </div>
         </div>
-    </div>
-</section>
-
-<!-- КАТЕГОРИИ -->
-<section class="section">
-    <div class="container">
-        <h2 class="section-title">Наши категории</h2>
-        <div class="categories-grid">
-            <div class="category-card">
-                <h3 class="feature-title">🏠 Декор для дома</h3>
-                <p class="feature-text">Элементы интерьера, которые создают уютную и стильную атмосферу в вашем пространстве</p>
-            </div>
-            <div class="category-card">
-                <h3 class="feature-title">🎁 Подарочные наборы</h3>
-                <p class="feature-text">Готовые решения для особых случаев с индивидуальным подходом к каждому подарку</p>
-            </div>
-            <div class="category-card">
-                <h3 class="feature-title">✨ Для настроения</h3>
-                <p class="feature-text">Товары, которые создают особую атмосферу и дарят приятные эмоции каждый день</p>
-            </div>
-            
+        <div class="adv">
+          <div class="adv-ico">🚚</div>
+          <div>
+            <h3>Быстрая доставка</h3>
+            <p>Собираем и отправляем без задержек.</p>
+          </div>
         </div>
-    </div>
-</section>
+        <div class="adv">
+          <div class="adv-ico">🎁</div>
+          <div>
+            <h3>Идеи для подарков</h3>
+            <p>Подборки под повод и готовые наборы.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-
-
-<!-- ФИНАЛЬНЫЙ CTA -->
-<section class="section">
-    <div class="container" style="text-align: center;">
-        <h2 class="section-title">Готовы создать свой уют?</h2>
-        <p class="hero-subtitle">Присоединяйтесь к тысячам довольных клиентов и откройте мир качественных товаров для дома</p>
-        <a href="/catalog/" class="cta-button">Начать покупки</a>
-    </div>
-</section>
+  </div>
+</div>
 {% endblock %}

@@ -1,0 +1,36 @@
+<!-- support/templates/support/admin_chat_simple.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Чат с {{ chat.user.username }}</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .admin { background: #d4edda; margin-left: 50px; }
+        .client { background: #f8d7da; margin-right: 50px; }
+        form { margin-top: 20px; }
+        textarea { width: 100%; height: 80px; }
+    </style>
+</head>
+<body>
+    <h2>Чат с {{ chat.user.username }}</h2>
+    
+    <div id="messages">
+        {% for msg in messages %}
+        <div class="message {% if msg.is_from_admin %}admin{% else %}client{% endif %}">
+            <strong>{% if msg.is_from_admin %}Админ{% else %}Клиент{% endif %}:</strong>
+            {{ msg.text }}
+            <br><small>{{ msg.created|date:"H:i" }}</small>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="text" placeholder="Введите ответ..." required></textarea>
+        <button type="submit">Отправить</button>
+    </form>
+    
+    <a href="{% url 'admin:index' %}">← Назад в админку</a>
+</body>
+</html>

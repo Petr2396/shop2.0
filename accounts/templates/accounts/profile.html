@@ -2,57 +2,265 @@
 {% block title %}Мой профиль{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-lg-8 col-md-10">
-      <div class="card shadow-lg border-0 rounded-3">
-        <div class="card-header   text-center py-4">
-          <h3 class="mb-0">Мой профиль</h3>
-        </div>
-        <div class="card-body p-4">
+<style>
+/* ===== Profile page (scoped) ===== */
+.pf { --brand:#ff6a00; --text:#111827; --muted:#6b7280; --line:#e5e7eb; --bg:#f8fafc; }
+.pf, .pf * { font-weight: 400; }
 
-          <!-- Фото профиля -->
-          <div class="text-center mb-4">
+.pf .wrap{ max-width: 980px; margin: 0 auto; padding: 18px 14px 48px; }
+
+.pf .cardx{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius: 18px;
+  overflow:hidden;
+  box-shadow: 0 14px 30px rgba(0,0,0,.06);
+}
+
+.pf .head{
+  padding: 18px 18px 14px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,106,0,.06), rgba(255,106,0,0));
+}
+.pf .title{
+  margin:0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+.pf .sub{
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pf .body{ padding: 18px; }
+
+.pf .top{
+  display:grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  align-items:center;
+  margin-bottom: 14px;
+}
+
+.pf .avatar{
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  overflow:hidden;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 10px 20px rgba(0,0,0,.06);
+}
+.pf .avatar img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+}
+
+.pf .name{
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+.pf .meta{
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pf .grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pf .field{
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background:#fff;
+}
+.pf .label{
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.pf .value{
+  color: var(--text);
+  font-size: 14px;
+}
+
+.pf .actions{
+  display:flex;
+  gap: 10px;
+  flex-wrap:wrap;
+  margin-top: 16px;
+}
+
+.pf .btnx{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 9px 12px;
+  text-decoration:none;
+  border: 1px solid var(--line);
+  background:#fff;
+  color: var(--text);
+  font-weight: 500;
+  transition: .15s;
+}
+.pf .btnx:hover{ transform: translateY(-1px); border-color:#d1d5db; }
+
+.pf .btnx.primary{
+  background: var(--brand);
+  border-color: var(--brand);
+  color:#fff;
+  box-shadow: 0 10px 20px rgba(255,106,0,.18);
+}
+.pf .btnx.primary:hover{ filter: brightness(.97); }
+
+.pf .foot{
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  display:flex;
+  justify-content:space-between;
+  gap: 10px;
+  flex-wrap:wrap;
+}
+
+/* SVG icons */
+.pf .icon{
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display:inline-block;
+}
+
+.pf .icon-fill{
+  width: 46px;
+  height: 46px;
+  fill: #9ca3af; /* серый */
+  display:inline-block;
+}
+
+/* mobile */
+@media (max-width: 720px){
+  .pf .top{ grid-template-columns: 1fr; justify-items:center; text-align:center; }
+  .pf .grid{ grid-template-columns: 1fr; }
+  .pf .foot{ justify-content:center; }
+}
+</style>
+
+<div class="pf">
+  <div class="wrap">
+    <div class="cardx">
+
+      <div class="head">
+        <div>
+          <h1 class="title">Мой профиль</h1>
+          <div class="sub">Данные аккаунта и контакты для доставки</div>
+        </div>
+      </div>
+
+      <div class="body">
+
+        <div class="top">
+          <div class="avatar">
             {% if profile.avatar %}
-              <img src="{{ profile.avatar.url }}" alt="Аватар" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;">
+              <img src="{{ profile.avatar.url }}" alt="Аватар">
             {% else %}
-              <i class="fa-solid fa-circle-user text-secondary" style="font-size: 120px;"></i>
+              <!-- default avatar icon (SVG, без FA) -->
+              <svg class="icon-fill" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8.2" r="3.6" />
+                <path d="M5 20c0-3.6 3.2-5.8 7-5.8s7 2.2 7 5.8" />
+              </svg>
             {% endif %}
           </div>
 
-          <!-- Основная информация -->
-          <dl class="row mb-4">
-            <dt class="col-sm-4 text-muted">Имя:</dt>
-            <dd class="col-sm-8">{{ user.first_name|default:"—" }}</dd>
+          <div>
+            <p class="name">
+              {% if user.first_name or user.last_name %}
+                {{ user.first_name }} {{ user.last_name }}
+              {% else %}
+                {{ user.username }}
+              {% endif %}
+            </p>
+            <div class="meta">
+              Email: {{ user.email|default:"—" }}
+            </div>
+          </div>
+        </div>
 
-            <dt class="col-sm-4 text-muted">Фамилия:</dt>
-            <dd class="col-sm-8">{{ user.last_name|default:"—" }}</dd>
-
-            <dt class="col-sm-4 text-muted">Email:</dt>
-            <dd class="col-sm-8">{{ user.email }}</dd>
-
-            <dt class="col-sm-4 text-muted">Телефон:</dt>
-            <dd class="col-sm-8">{{ profile.phone|default:"—" }}</dd>
-
-            <dt class="col-sm-4 text-muted">Адрес:</dt>
-            <dd class="col-sm-8">{{ profile.address|default:"—" }}</dd>
-          </dl>
-
-          <!-- Кнопки действий -->
-          <div class="d-flex justify-content-center gap-3">
-            <a href="{% url 'orders:my_orders' %}" class="btn btn-outline-primary">
-              <i class="fa-solid fa-box"></i> Мои заказы
-            </a>
-            <a href="{% url 'accounts:edit_profile' %}" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-pen"></i> Редактировать профиль
-              </a>
+        <div class="grid">
+          <div class="field">
+            <div class="label">Имя</div>
+            <div class="value">{{ user.first_name|default:"—" }}</div>
           </div>
 
+          <div class="field">
+            <div class="label">Фамилия</div>
+            <div class="value">{{ user.last_name|default:"—" }}</div>
+          </div>
+
+          <div class="field">
+            <div class="label">Телефон</div>
+            <div class="value">{{ profile.phone|default:"—" }}</div>
+          </div>
+
+          <div class="field">
+            <div class="label">Адрес</div>
+            <div class="value">{{ profile.address|default:"—" }}</div>
+          </div>
         </div>
-        <div class="card-footer text-center text-muted small py-3">
-          Последний вход: {{ user.last_login|date:"d.m.Y H:i" }}
+
+        <div class="actions">
+          <a href="{% url 'orders:my_orders' %}" class="btnx primary">
+            <!-- box icon -->
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 8 12 3 3 8l9 5 9-5Z"/>
+              <path d="M3 8v10l9 5 9-5V8"/>
+              <path d="M12 13v10"/>
+            </svg>
+            Мои заказы
+          </a>
+
+          <a href="{% url 'accounts:edit_profile' %}" class="btnx">
+            <!-- pen icon -->
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"/>
+            </svg>
+            Редактировать
+          </a>
         </div>
+
       </div>
+
+      <div class="foot">
+        <div>Последний вход: {{ user.last_login|date:"d.m.Y H:i"|default:"—" }}</div>
+        <div style="color:#9ca3af;">Огонь Жизни</div>
+      </div>
+
     </div>
   </div>
 </div>

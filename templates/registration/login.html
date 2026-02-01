@@ -4,14 +4,84 @@
 {% extends "base.html" %}
 {% block title %}Вход - Огонь Жизни{% endblock %}
 {% block content %}
+
+<div class="auth-container">
+     <div class="auth-card">
+  <h2>Вход или регистрация</h2>
+ 
+  <form method="post" class="auth-form">
+  {% csrf_token %}
+
+  <label>Телефон</label>
+  <input
+    type="tel"
+    name="phone"
+    id="phone"
+    value="{{ phone|default:'+7' }}"
+    required
+    maxlength="12"
+    autocomplete="tel"
+  >
+
+  {% if ask_password %}
+    <label>
+      {% if user_exists %}
+        Введите пароль
+      {% else %}
+        Придумайте пароль
+      {% endif %}
+    </label>
+
+    <input type="password" name="password" required>
+  {% endif %}
+
+  <button type="submit" class="auth-button">
+    {% if ask_password %}
+      Продолжить
+    {% else %}
+      Далее
+    {% endif %}
+  </button>
+</form>
+  
+</div>
+</div>
+
+
+
+<!-- 
+
 <div class="auth-container">
     <div class="auth-card">
         <h2 class="auth-title">Вход в аккаунт</h2>
-        <form method="post" class="auth-form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button class="auth-button" type="submit">Войти</button>
-        </form>
+         <form method="post" class="auth-form">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="phone">Телефон</label>
+      <input
+        type="text"
+        id="phone"
+        name="phone"
+        placeholder="+7 900 123-45-67"
+        required
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="password">Пароль</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+      >
+    </div>
+
+    <button type="submit" class="auth-button">
+      Войти
+    </button>
+  </form>
         
         <div class="auth-links">
             <p>Нет аккаунта? <a href="/accounts/signup/" class="auth-link">Зарегистрироваться</a></p>
@@ -19,6 +89,10 @@
         </div>
     </div>
 </div>
+
+ -->
+
+
 
 <style>
 .auth-container {
@@ -138,6 +212,48 @@
         font-size: 24px;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.hidden {
+  display: none;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 16px;
+  user-select: none;
+  opacity: 0.6;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+}
+
 </style>
 
 

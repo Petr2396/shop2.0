@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 app_name = "orders"
 
 urlpatterns = [
@@ -16,5 +17,7 @@ urlpatterns = [
     path('cart/remove-promo/', views.remove_promo_code, name='remove_promo'),
     path("return/<int:order_id>/", views.return_request, name="return_request"),
     path("my-returns/", views.my_returns, name="my_returns"),
+    path("confirm/", views.confirm_order, name="confirm_order"),
+
 
 ]

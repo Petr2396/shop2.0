@@ -1,5 +1,6 @@
 {% load static %}
 {% load cart_filters %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,8 +8,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{% block title %}Магазин{% endblock %}</title>
 
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.6.0/css/all.css">
+  
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -272,6 +272,82 @@
     }
 
 
+    .support-chat {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+}
+
+.support-chat__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+}
+
+.support-chat__messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #f9f9f9;
+}
+
+.support-message {
+    max-width: 70%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.support-message.user {
+    background: #007bff;
+    color: #fff;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.support-message.admin {
+    background: #e9ecef;
+    color: #333;
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+.support-chat__form {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #eee;
+    gap: 10px;
+}
+
+.support-chat__form input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+.support-chat__form button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.support-chat__form button:hover {
+    background: #0056b3;
+}
+
+
     /* Скрываем только если 0 */
 .cart-count[data-count="0"],
 .cart-count:contains("0") {
@@ -282,7 +358,171 @@
 .cart-count:empty {
     display: none !important;
 }
+
+
+
+.support-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff7a00, #ff9a3c);
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+    text-decoration: none;
+
+    box-shadow: 0 10px 25px rgba(255,122,0,0.45);
+    z-index: 1000;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* hover только для десктопа */
+@media (hover: hover) {
+    .support-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 14px 30px rgba(255,122,0,0.55);
+        color: #fff;
+    }
+}
+
+/* === MOBILE FIX === */
+@media (max-width: 768px) {
+    .support-fab {
+        bottom: 25px;
+        right: 16px;
+
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        min-height: 52px;
+
+        font-size: 20px;
+    }
+}
+
+
+
+.floating-cart {
+    position: fixed;
+    right: 24px;
+    bottom: 90px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #ff7a00, #ff9a3c);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    z-index: 9999;
+    transition: all 0.3s ease;
+}
+
+.floating-cart i {
+    font-size: 26px;
+}
+
+.floating-cart:hover {
+    
+    transform: scale(1.08);
+}
+
+.floating-cart__count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    font-size: 14px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Мобилка */
+@media (max-width: 768px) {
+    .floating-cart {
+        width: 55px;
+        height: 55px;
+        right: 15px;
+        bottom: 90px;
+    }
+
+    .floating-cart i {
+        font-size: 22px;
+    }
+}
+
+@keyframes pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.2); }
+    70% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.floating-cart.pop {
+    animation: pop 0.4s ease;
+}
+
+
+
+/* ===== SVG Icons (универсально) ===== */
+.icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: inline-block;
+}
+
+.icon-star {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  display: inline-block;
+}
+
+
+.icon.bag-solid path { fill: currentColor; stroke: none; }
+
+
+
+.floating-cart .icon{
+  width: 26px;
+  height: 26px;
+}
+
+
+
+.profile-icon{
+  width: 22px;
+  height: 22px;
+  color: #111827; /* почти чёрный, мягче чем pure black */
+}
   </style>
+  {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -297,7 +537,7 @@
   <div class="nav-container">
 
     <!-- Лого -->
-    <img src="{% static 'logo9.png' %}" alt="Логотип" class="logo">
+    <img src="{% static 'new-logo.png' %}" alt="Логотип" class="logo">
 
        <!-- Гамбургер кнопка для мобильных -->
        <!-- Гамбургер кнопка -->
@@ -312,23 +552,28 @@
       <a href="{% url 'home' %}">Главная</a>
       <a href="{% url 'catalog:product_list' %}">Каталог</a>
 
-      <a href="{% url 'orders:cart_detail' %}" class="cart-icon">
-        <i class="fa-solid fa-bag-shopping"></i>
-        
-        {% if request.session.cart %}
-        {% with total_items=request.session.cart|cart_total_quantity %}
-            {% if total_items > 0 %}
-                <span class="cart-count">{{ total_items }}</span>
-            {% endif %}
-        {% endwith %}
-    {% endif %}
+      
 
+     
+     
 
-      </a>
 
       {% if user.is_authenticated %}
         <div class="profile-wrapper">
-          <i id="profileIcon" class="fas fa-user profile-icon"></i>
+          
+         <svg
+  id="profileIcon"
+  class="profile-icon icon"
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+>
+  <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <circle cx="12" cy="9" r="3" fill="currentColor"/>
+  <path d="M7 18c0-2.8 3-4.5 5-4.5s5 1.7 5 4.5" fill="currentColor"/>
+</svg>
+
+
+
 
           <div id="profileMenu" class="profile-menu">
             <a href="{% url 'accounts:profile' %}">Профиль</a>
@@ -342,7 +587,7 @@
         </div>
       {% else %}
         <a href="{% url 'accounts:login' %}">Войти</a>
-        <a href="/accounts/signup/">Регистрация</a>
+        
       {% endif %}
     </div>
   </div>
@@ -350,14 +595,7 @@
 
 <!-- ===== CONTENT ===== -->
 <main>
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
+ 
 
   {% block content %}{% endblock %}
 </main>
@@ -386,6 +624,38 @@
         menu.style.display = "none";
       }
     });
+
+
+
+
+
+
+
+
+    function togglePassword() {
+  const input = document.getElementById("password");
+  input.type = input.type === "password" ? "text" : "password";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const phoneInput = document.getElementById("phone");
+
+  if (!phoneInput) return;
+
+  phoneInput.addEventListener("input", function () {
+    let x = phoneInput.value.replace(/\D/g, '').slice(0, 11);
+    if (x.startsWith("8")) x = "7" + x.slice(1);
+    if (!x.startsWith("7")) x = "7" + x;
+
+    let formatted = "+7";
+    if (x.length > 1) formatted += " (" + x.slice(1, 4);
+    if (x.length >= 5) formatted += ") " + x.slice(4, 7);
+    if (x.length >= 8) formatted += "-" + x.slice(7, 9);
+    if (x.length >= 10) formatted += "-" + x.slice(9, 11);
+
+    phoneInput.value = formatted;
+  });
+});
   }
 
   
@@ -466,12 +736,143 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Гамбургер инициализирован!');
 });
   
+function animateCart() {
+    const cart = document.querySelector('.floating-cart');
+    if (!cart) return;
+    cart.classList.add('pop');
+    setTimeout(() => cart.classList.remove('pop'), 400);
+}
 
 
+
+
+(function () {
+  function getCookie(name) {
+    const v = `; ${document.cookie}`;
+    const parts = v.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  function showToast(text) {
+    let t = document.getElementById("toastCart");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "toastCart";
+      t.style.cssText = `
+        position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+        background: #111827; color: #fff;
+        padding: 10px 12px; border-radius: 999px;
+        font-size: 13px; box-shadow: 0 12px 30px rgba(0,0,0,.22);
+        opacity: 0; transition: opacity .18s ease, transform .18s ease;
+        z-index: 9999;
+      `;
+      document.body.appendChild(t);
+    }
+    t.textContent = text;
+    t.style.opacity = "1";
+    t.style.transform = "translateX(-50%) translateY(-2px)";
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => {
+      t.style.opacity = "0";
+      t.style.transform = "translateX(-50%) translateY(0)";
+    }, 1400);
+  }
+
+  function setCartBadge(qty) {
+    // поставь у себя в navbar элемент со счётчиком, например:
+    // <span id="cartBadge">0</span>
+    const badge = document.getElementById("cartBadge");
+    if (!badge) return;
+    badge.textContent = qty;
+    badge.style.display = (qty && qty > 0) ? "inline-flex" : "none";
+  }
+
+  document.addEventListener("submit", async function (e) {
+    const form = e.target.closest("form.js-add-to-cart");
+    if (!form) return;
+
+    e.preventDefault();
+
+    const btn = form.querySelector('button[type="submit"]');
+    const oldHtml = btn ? btn.innerHTML : null;
+    if (btn) btn.disabled = true;
+
+    try {
+      const res = await fetch(form.action, {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: new FormData(form),
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        setCartBadge(data.cart_qty);
+        showToast(data.message || "Добавлено в корзину");
+      } else {
+        showToast("Не удалось добавить в корзину");
+      }
+    } catch (err) {
+      showToast("Ошибка сети");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        if (oldHtml !== null) btn.innerHTML = oldHtml;
+      }
+    }
+  });
+})();
 
 
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+
+
+<a href="{% url 'orders:cart_detail' %}" class="floating-cart">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- корпус: ровный верх/низ, мягкие углы -->
+  <rect x="6.5" y="8" width="11" height="12" rx="2.6" fill="currentColor"/>
+  <!-- ручка -->
+  <path d="M9 8V6.8a3 3 0 0 1 6 0V8"
+        stroke="currentColor" stroke-width="2"
+        fill="none" stroke-linecap="round"/>
+</svg>
+
+
+
+
+    {% if request.session.cart %}
+        {% with total_items=request.session.cart|cart_total_quantity %}
+            {% if total_items > 0 %}
+                <span class="floating-cart__count">{{ total_items }}</span>
+            {% endif %}
+        {% endwith %}
+    {% endif %}
+</a>
+
+
+
+     <a href="{% url 'support_chat' %}" class="support-fab">
+  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+  <path
+    d="M12 4c-5 0-9 3.2-9 7.3 0 1.3.4 2.6 1.2 3.7L3 20l5.1-1.8c1.2.5 2.5.8 3.9.8 5 0 9-3.2 9-7.3S17 4 12 4Z"
+    fill="currentColor"
+  />
+  <path d="M8 11h8" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+  <path d="M8 14h5.5" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+</svg>
+
+
+
+</a>
+
+
+
 </body>
 </html>

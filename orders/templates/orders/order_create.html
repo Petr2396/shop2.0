@@ -4,7 +4,6 @@
 {% block content %}
 <div class="checkout-container">
   <h1 class="mb-3">Оформление заказа</h1>
-
   <form method="post" class="checkout-form">
     {% csrf_token %}
     {{ form.as_p }}
@@ -16,7 +15,12 @@
       и условиями обработки персональных данных.
     </p>
   </form>
+
+  
 </div>
+
+
+
 
 <style>
 /* Контейнер */
