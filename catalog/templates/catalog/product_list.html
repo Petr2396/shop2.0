@@ -260,6 +260,209 @@
 
 
 
+/* ===== Product card polish ===== */
+.p-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.p-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0,0,0,.08);
+}
+
+.p-media {
+  height: 180px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.p-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.p-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+/* категория + рейтинг */
+.p-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* название */
+.p-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* цена */
+.p-price {
+  font-size: 17px;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 2px;
+}
+
+/* кнопки */
+.p-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-detail {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  text-align: center;
+  transition: .15s;
+}
+
+.btn-detail:hover {
+  background: #f9fafb;
+}
+
+.btn-cart {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 0;
+  background: #ff6a00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+
+/* ===== Quick View (scoped) ===== */
+.qv-modal .modal-content{
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 18px 60px rgba(0,0,0,.18);
+}
+
+.qv-modal .modal-header{
+  padding: 12px 16px;
+  border-bottom: 1px solid #eef2f7;
+  background: #fff;
+}
+
+.qv-modal .modal-title{
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.qv-modal .modal-body{
+  padding: 16px;
+  background: #fff;
+}
+
+/* layout */
+.qv-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 992px){ .qv-grid{ grid-template-columns: 1fr; } }
+
+/* image */
+.qv-media{
+  height: 340px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.qv-media img{ width:100%; height:100%; object-fit: contain; }
+
+/* content */
+.qv-cat{ color:#6b7280; font-size:12px; margin-bottom: 6px; }
+.qv-name{ font-size: 18px; font-weight: 500; color:#111827; line-height:1.25; margin:0; }
+.qv-rating{ margin-top: 8px; color:#6b7280; font-size: 12px; display:flex; align-items:center; gap:8px; }
+.qv-rating .star{ color:#ff6a00; }
+
+.qv-price{ margin-top: 12px; font-size: 22px; font-weight: 600; color:#111827; }
+.qv-desc{ margin-top: 10px; color:#374151; font-size: 13.5px; line-height: 1.35; }
+
+/* buttons */
+.qv-actions{ margin-top: 14px; display:flex; gap: 10px; flex-wrap: wrap; }
+
+.qv-btn-primary{
+  background:#ff6a00;
+  color:#fff;
+  border:0;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.qv-btn-primary:hover{ filter: brightness(.97); transform: translateY(-1px); }
+
+.qv-btn-secondary{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#111827;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.qv-btn-secondary:hover{ background:#f9fafb; }
+
+.qv-mini{
+  color:#6b7280;
+  font-size:12px;
+  margin-top: 10px;
+}
+
+/* skeleton feel */
+.qv-skel{
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 37%, #f3f4f6 63%);
+  background-size: 400% 100%;
+  animation: qvShimmer 1.1s ease infinite;
+  border-radius: 10px;
+}
+@keyframes qvShimmer{
+  0%{ background-position: 100% 0; }
+  100%{ background-position: 0 0; }
+}
+
+
+
 
 </style>
 
@@ -302,9 +505,9 @@
   <div id="productsContainer">
     <div class="grid">
       {% for product in products %}
-        <div class="mp-card">
-          <div class="media">
-            <span class="badge">Топ</span>
+        <div class="p-card">
+          <div class="p-media">
+            
             {% if product.images.first %}
               <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
             {% else %}
@@ -312,26 +515,23 @@
             {% endif %}
           </div>
 
-          <div class="body">
-            <div class="name">{{ product.name }}</div>
+          <div class="p-body">
+            <div class="p-name">{{ product.name }}</div>
 
-            <div class="meta">
-              {% if product.category %}
-                <span>{{ product.category.name }}</span>
-              {% else %}
-                <span>&nbsp;</span>
-              {% endif %}
+           <div class="p-meta">
+  <span>{{ product.category.name }}</span>
 
-              {% if product.rating_count %}
-                <span><span class="stars">★</span> {{ product.rating_avg|floatformat:1 }} ({{ product.rating_count }})</span>
-              {% else %}
-                <span>&nbsp;</span>
-              {% endif %}
-            </div>
+  {% if product.rating_count %}
+    <span>
+      ★ {{ product.rating_avg|floatformat:1 }}
+      <span style="opacity:.6;">({{ product.rating_count }})</span>
+    </span>
+  {% endif %}
+</div>
 
-            <div class="price">{{ product.price }} ₽</div>
+            <div class="p-price">{{ product.price }} ₽</div>
 
-            <div class="actions">
+            <div class="p-actions">
               <button
   type="button"
   class="btn-detail quick-btn"
@@ -422,6 +622,32 @@ document.addEventListener("DOMContentLoaded", function () {
   const qvRating = document.getElementById("qvRating");
   const qvCartForm = document.getElementById("qvCartForm");
   const qvDetailLink = document.getElementById("qvDetailLink");
+  const qvMini = document.getElementById("qvMini");
+
+  function setLoading() {
+    qvTitle.textContent = "Быстрый просмотр";
+    qvCategory.textContent = "";
+    qvName.textContent = "Загрузка…";
+    qvPrice.textContent = "";
+    qvDesc.textContent = "";
+    qvRating.style.display = "none";
+    qvMini.textContent = "";
+
+    qvName.classList.add("qv-skel");
+    qvPrice.classList.add("qv-skel");
+    qvDesc.classList.add("qv-skel");
+
+    qvImage.src = "";
+    qvImage.alt = "";
+    qvCartForm.action = "";
+    qvDetailLink.href = "#";
+  }
+
+  function clearLoading() {
+    qvName.classList.remove("qv-skel");
+    qvPrice.classList.remove("qv-skel");
+    qvDesc.classList.remove("qv-skel");
+  }
 
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest(".quick-btn");
@@ -430,25 +656,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const slug = btn.getAttribute("data-slug");
     if (!slug) return;
 
-    qvTitle.textContent = "Загрузка…";
-    qvName.textContent = "";
-    qvCategory.textContent = "";
-    qvPrice.textContent = "";
-    qvDesc.textContent = "Загружаем данные…";
-    qvRating.style.display = "none";
-    qvImage.src = "";
-    qvCartForm.action = "";
-    qvDetailLink.href = "#";
+    setLoading();
 
     try {
       const res = await fetch(`/catalog/quick/${slug}/`);
       const data = await res.json();
 
-      qvTitle.textContent = "Быстрый просмотр";
+      clearLoading();
+
+      qvCategory.textContent = data.category || "";
       qvName.textContent = data.name || "";
-      qvCategory.textContent = data.category ? data.category : "";
       qvPrice.textContent = (data.price || "") + " ₽";
-      qvDesc.textContent = (data.description || "").slice(0, 400) + ((data.description || "").length > 400 ? "…" : "");
+
+      const desc = (data.description || "").trim();
+      qvDesc.textContent = desc ? (desc.length > 420 ? desc.slice(0, 420) + "…" : desc) : "Описание скоро появится.";
 
       if (data.image) {
         qvImage.src = data.image;
@@ -461,58 +682,61 @@ document.addEventListener("DOMContentLoaded", function () {
       qvDetailLink.href = data.detail_url || "#";
 
       if (data.rating_count && data.rating_count > 0 && data.rating_avg !== null) {
-        qvRating.style.display = "block";
-        qvRating.innerHTML = `<span style="color:#ff6a00;">★</span> ${data.rating_avg.toFixed(1)} (${data.rating_count})`;
+        qvRating.style.display = "flex";
+        qvRating.innerHTML = `<span class="star">★</span> ${Number(data.rating_avg).toFixed(1)} <span style="opacity:.6;">(${data.rating_count})</span>`;
       } else {
         qvRating.style.display = "none";
       }
+
+      qvMini.textContent = "";
     } catch (err) {
-      qvTitle.textContent = "Ошибка";
+      clearLoading();
+      qvName.textContent = "Ошибка";
       qvDesc.textContent = "Не удалось загрузить товар. Обнови страницу и попробуй снова.";
     }
   });
 });
 </script>
 
-<!-- Quick View Modal (Bootstrap) -->
-<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade qv-modal" id="quickViewModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+    <div class="modal-content">
+
       <div class="modal-header">
         <h5 class="modal-title" id="qvTitle">Быстрый просмотр</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
       </div>
 
       <div class="modal-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div style="height:320px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-              <img id="qvImage" src="" alt="" style="width:100%;height:100%;object-fit:contain;">
-            </div>
+        <div class="qv-grid">
+          <div class="qv-media">
+            <img id="qvImage" src="" alt="">
           </div>
 
-          <div class="col-md-6">
-            <div class="text-muted mb-1" id="qvCategory"></div>
+          <div>
+            <div class="qv-cat" id="qvCategory"></div>
+            <h4 class="qv-name" id="qvName"></h4>
 
-            <div class="d-flex align-items-center justify-content-between gap-2">
-              <h4 class="mb-1" id="qvName"></h4>
-            </div>
+            <div class="qv-rating" id="qvRating" style="display:none;"></div>
 
-            <div class="mb-2" id="qvRating" style="font-size:13px;color:#6b7280; display:none;"></div>
+            <div class="qv-price" id="qvPrice"></div>
+            <div class="qv-desc" id="qvDesc"></div>
 
-            <div class="mb-3" style="font-size:22px;" id="qvPrice"></div>
+            <div class="qv-actions">
+              <form method="post" id="qvCartForm" action="">
+                {% csrf_token %}
+                <button type="submit" class="qv-btn-primary">
+                  <!-- можно вставить svg корзины -->
+                  В корзину
+                </button>
+              </form>
 
-            <div class="mb-3" style="color:#374151; font-size:14px; line-height:1.35;" id="qvDesc"></div>
-
-            <form method="post" id="qvCartForm" action="" class="js-add-to-cart">
-              {% csrf_token %}
-              <button type="submit" class="btn" style="background:#ff6a00;color:#fff;border-radius:999px;padding:9px 12px;font-weight:500;border:0;">
-                 В корзину
-              </button>
-              <a id="qvDetailLink" href="#" class="btn btn-outline-secondary ms-2" style="border-radius:999px;padding:9px 12px;font-weight:500;">
+              <a id="qvDetailLink" href="#" class="qv-btn-secondary">
                 Перейти на товар
               </a>
-            </form>
+            </div>
+
+            <div class="qv-mini" id="qvMini"></div>
           </div>
         </div>
       </div>
@@ -520,5 +744,6 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 </div>
+
 
 {% endblock %}

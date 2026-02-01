@@ -1,5 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
+from django.db.models import F
+from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -86,14 +89,63 @@ def order_create(request):
         if form.is_valid():
             order = form.save(commit=False)
 
+            # ✅ Привязываем пользователя
             if request.user.is_authenticated:
                 order.customer = request.user
 
-            if hasattr(cart, 'promo_code') and cart.promo_code:
-                order.promo_code = cart.promo_code.get('code')
-                order.discount = cart.promo_code.get('discount', 0)
-                order.total_with_discount = cart.get_total_with_discount()
+                # ✅ Автозаполнение данных заказа из User/Profile
+                profile = getattr(request.user, "profile", None)
 
+                order.first_name = request.user.first_name or order.first_name
+                order.last_name = request.user.last_name or order.last_name
+                order.email = request.user.email or order.email
+
+                if profile:
+                    order.phone = getattr(profile, "phone", "") or order.phone
+                    # если адрес не вводится в форме — берём из профиля
+                    order.address = getattr(profile, "address", "") or order.address
+
+            # ===== Промокод: применяем ТОЛЬКО если удалось списать лимит =====
+            promo_applied = False
+            now = timezone.now()
+
+            if hasattr(cart, "promo_code") and cart.promo_code:
+                code = (cart.promo_code.get("code") or "").strip()
+
+                if code:
+                    with transaction.atomic():
+                        updated = (
+                            PromoCode.objects
+                            .select_for_update()
+                            .filter(
+                                code__iexact=code,
+                                active=True,
+                                valid_from__lte=now,
+                                valid_to__gte=now,
+                                used_count__lt=F("max_usage"),
+                            )
+                            .update(used_count=F("used_count") + 1)
+                        )
+
+                        if updated == 1:
+                            promo = PromoCode.objects.get(code__iexact=code)
+                            order.promo_code = promo.code
+                            order.discount = promo.discount
+                            order.total_with_discount = cart.get_total_with_discount()
+                            promo_applied = True
+                        else:
+                            # промокод закончился — чистим в корзине
+                            try:
+                                cart.remove_promo_code()
+                            except Exception:
+                                pass
+
+            if not promo_applied:
+                order.promo_code = None
+                order.discount = 0
+                order.total_with_discount = None
+
+            # ===== Сохраняем заказ и позиции =====
             order.save()
 
             for item in cart:
@@ -124,13 +176,12 @@ def order_create(request):
     })
 
 
-
 def order_success(request):
     return render(request, "orders/order_success.html")
 
 
-
 def confirm_order(request):
+    # Если уже авторизован — сразу к оплате
     if request.user.is_authenticated:
         return _redirect_to_payment(request)
 
@@ -148,12 +199,12 @@ def confirm_order(request):
 
         profile = Profile.objects.filter(phone=phone).select_related("user").first()
 
-        # 🔹 ШАГ 1 — ввели ТОЛЬКО телефон
+        # ШАГ 1: ввели только телефон
         if not password:
             show_password = True
             user_exists = bool(profile)
 
-        # 🔹 ШАГ 2 — телефон + пароль
+        # ШАГ 2: телефон + пароль
         else:
             if profile:
                 user = authenticate(
@@ -196,88 +247,6 @@ def confirm_order(request):
     )
 
 
-"""
-
-def confirm_order(request):
-  
-
-    # Если уже авторизован — сразу к оплате
-    if request.user.is_authenticated:
-        return _redirect_to_payment(request)
-
-    phone = ""
-    show_password = False
-    user_exists = False
-
-    if request.method == "POST":
-        phone = request.POST.get("phone", "").strip()
-        password = request.POST.get("password", "")
-
-        if not phone:
-            messages.error(request, "Введите номер телефона")
-            return redirect("orders:confirm_order")
-
-        # Ищем профиль по телефону
-        profile = (
-            Profile.objects
-            .filter(phone=phone)
-            .select_related("user")
-            .first()
-        )
-
-        # ------------------------
-        # Пользователь СУЩЕСТВУЕТ
-        # ------------------------
-        if profile:
-            user_exists = True
-            show_password = True
-
-            if password:
-                user = authenticate(
-                    request,
-                    username=profile.user.username,
-                    password=password
-                )
-                if user:
-                    login(request, user)
-                    return _redirect_to_payment(request)
-                else:
-                    messages.error(request, "Неверный пароль")
-
-        # ------------------------
-        # Пользователя НЕТ
-        # ------------------------
-        else:
-            show_password = True
-
-            if password:
-                # создаём пользователя
-                username = f"user_{phone.replace('+', '').replace(' ', '')}"
-
-                user = User.objects.create_user(
-                    username=username,
-                    password=password
-                )
-
-                # ❗️Профиль УЖЕ создан сигналом
-                profile = user.profile
-                profile.phone = phone
-                profile.save()
-
-                login(request, user)
-                return _redirect_to_payment(request)
-
-    return render(
-        request,
-        "orders/confirm.html",
-        {
-            "phone": phone,
-            "show_password": show_password,
-            "user_exists": user_exists,
-        }
-    )
-"""
-
 def _redirect_to_payment(request):
     order_id = request.session.get("order_id")
     if not order_id:
@@ -286,11 +255,29 @@ def _redirect_to_payment(request):
 
     order = Order.objects.get(id=order_id)
     order.customer = request.user
-    order.save(update_fields=["customer"])
+
+    # ✅ ДОЗАПОЛНЯЕМ заказ данными профиля (важно для гостевого оформления)
+    profile = getattr(request.user, "profile", None)
+
+    if not order.first_name:
+        order.first_name = request.user.first_name or ""
+    if not order.last_name:
+        order.last_name = request.user.last_name or ""
+    if not order.email:
+        order.email = request.user.email or ""
+
+    if profile:
+        if not order.phone:
+            order.phone = getattr(profile, "phone", "") or ""
+        if not order.address:
+            order.address = getattr(profile, "address", "") or ""
+
+    order.save()
 
     del request.session["order_id"]
 
     return create_payment(request, order)
+
 
 
 
@@ -342,34 +329,66 @@ def cancel_order(request, order_id):
 
 
 
+@require_POST
 def apply_promo_code(request):
-    if request.method == 'POST':
-        code = request.POST.get('code', '').strip().upper()
-        cart = Cart(request)
-        
-        success, result = cart.apply_promo_code(code)
-        
-        if success:
-            return JsonResponse({
-                'success': True,
-                'discount': result.discount,
-                'original_total': cart.get_total_price(),  # Добавляем
-                'new_total': cart.get_total_with_discount(),
-                'message': f'Промокод применен! Скидка {result.discount}%'
-            })
-        else:
-            return JsonResponse({
-                'success': False,
-                'message': result
-            })
-    
-    return JsonResponse({'success': False, 'message': 'Invalid request'})
+    code = request.POST.get('code', '').strip()
+    cart = Cart(request)
+    now = timezone.now()
+
+    if not code:
+        return JsonResponse({'success': False, 'message': 'Введите промокод'})
+
+    # Нормализуем: как у тебя было (upper)
+    code_norm = code.upper()
+
+    promo = (
+        PromoCode.objects
+        .filter(
+            code__iexact=code_norm,
+            active=True,
+            valid_from__lte=now,
+            valid_to__gte=now,
+            used_count__lt=F("max_usage"),
+        )
+        .first()
+    )
+
+    if not promo:
+        # на всякий случай чистим промо из корзины
+        try:
+            cart.remove_promo_code()
+        except Exception:
+            pass
+
+        return JsonResponse({
+            'success': False,
+            'message': 'Промокод недействителен или лимит использований исчерпан'
+        })
+
+    # ✅ применяем в корзину (без списания used_count!)
+    # ВАЖНО: используем твой cart.apply_promo_code, но передаём нормализованный код
+    success, result = cart.apply_promo_code(code_norm)
+
+    if success:
+        return JsonResponse({
+            'success': True,
+            'discount': promo.discount,
+            'original_total': cart.get_total_price(),
+            'new_total': cart.get_total_with_discount(),
+            'message': f'Промокод применен! Скидка {promo.discount}%'
+        })
+
+    return JsonResponse({
+        'success': False,
+        'message': result if isinstance(result, str) else 'Не удалось применить промокод'
+    })
 
 def remove_promo_code(request):
     cart = Cart(request)
     cart.remove_promo_code()
     return JsonResponse({
         'success': True,
+        'original_total': cart.get_total_price(),
         'new_total': cart.get_total_price(),
         'message': 'Промокод удален'
     })
@@ -381,7 +400,7 @@ def remove_promo_code(request):
 
 @login_required
 def create_return_request(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order = get_object_or_404(Order, id=order_id, customer=request.user)
 
     if request.method == "POST":
         form = ReturnRequestForm(request.POST, request.FILES, order=order)
