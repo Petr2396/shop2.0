@@ -847,13 +847,16 @@ function animateCart() {
 
 
 
-    {% if request.session.cart %}
-        {% with total_items=request.session.cart|cart_total_quantity %}
-            {% if total_items > 0 %}
-                <span class="floating-cart__count">{{ total_items }}</span>
-            {% endif %}
-        {% endwith %}
-    {% endif %}
+    {# Счётчик всегда в DOM #}
+  {% with total_items=request.session.cart|cart_total_quantity %}
+    <span
+      id="cartBadge"
+      class="floating-cart__count"
+      style="{% if not total_items or total_items <= 0 %}display:none;{% endif %}"
+    >
+      {{ total_items|default:"0" }}
+    </span>
+  {% endwith %}
 </a>
 
 
