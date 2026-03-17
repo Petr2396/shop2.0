@@ -8,8 +8,9 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'icon', 'order', 'product_count')
-    list_editable = ('order',)
+    list_display = ('name', 'parent', 'order')
+    list_filter = ('parent',)
+    search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
     
     def product_count(self, obj):
@@ -18,10 +19,12 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'category')
-    list_filter = ('category',)
-    search_fields = ('name', 'description')
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ("name", "price", "stock", "is_active", "category", "on_main_page")
+    list_filter = ("is_active", "category", "on_main_page")
+    search_fields = ("name", "description")
+    prepopulated_fields = {"slug": ("name",)}
+    list_editable = ("stock", "is_active", "on_main_page")  # редактирование прямо в списке
+    list_per_page = 50
     inlines = [ProductImageInline]
 
 @admin.register(ProductImage)

@@ -1,0 +1,81 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Категории{% endblock %}
+
+{% block content %}
+
+  <div class="crumbs">
+    <a href="/dashboard/">Dashboard</a> / Категории
+  </div>
+
+  <div class="topbar">
+    <div>
+      <h1 class="page-title">Категории</h1>
+      <div class="page-sub">Управляй категориями: добавляй, редактируй, удаляй</div>
+    </div>
+
+    <a class="btn" href="{% url 'dashboard:category_create' %}">+ Добавить категорию</a>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <form method="get" class="two-col">
+      <input class="input" type="text" name="q" value="{{ q|default:'' }}" placeholder="Поиск по названию или slug...">
+      <div class="toolbar">
+        <button class="btn secondary" type="submit">Найти</button>
+        {% if q %}
+          <a class="btn secondary" href="{% url 'dashboard:categories_list' %}">Сбросить</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="mb-0">Категории</h4>
+    <small class="muted">Всего: {{ categories|length }}</small>
+  </div>
+
+  <a href="{% url 'dashboard:category_create' %}" class="btn btn-brand">
+    + Добавить
+  </a>
+</div>
+
+<div class="card p-3">
+  {% if categories %}
+    <table class="table-clean">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Название</th>
+          <th>Slug</th>
+          <th class="text-end">Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in categories %}
+        <tr>
+          <td>#{{ c.id }}</td>
+          <td><strong>{{ c.name }}</strong></td>
+          <td><span class="badge-soft">{{ c.slug|default:"—" }}</span></td>
+          <td class="text-end">
+            <a href="{% url 'dashboard:category_update' c.id %}" class="btn btn-sm btn-soft">Редактировать</a>
+            <a href="{% url 'dashboard:category_delete' c.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty-state">
+      <div style="font-size:40px;">📂</div>
+      <h4>Категорий пока нет</h4>
+      <p>Создай первую категорию, чтобы начать работать с товарами.</p>
+      <a href="{% url 'dashboard:category_create' %}" class="btn btn-brand">
+        + Добавить категорию
+      </a>
+    </div>
+  {% endif %}
+</div>
+  </div>
+
+{% endblock %}

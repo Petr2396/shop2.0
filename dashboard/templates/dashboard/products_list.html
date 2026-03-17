@@ -1,0 +1,270 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="dash-wrap products-page">
+
+  <div class="dash-top products-top">
+    <div>
+      <h1 class="dash-title">Товары</h1>
+      <div class="dash-sub">Управление каталогом и быстрый доступ к карточкам товаров</div>
+    </div>
+
+    <a class="btn btn-brand products-add-btn" href="{% url 'dashboard:product_create' %}">
+      ＋ Добавить товар
+    </a>
+  </div>
+
+  <div class="card products-search-card">
+    <form method="get" class="search-row products-search-row">
+      <input
+        class="form-control products-search-input"
+        name="q"
+        value="{{ q }}"
+        placeholder="Поиск по названию товара…"
+      >
+      <button class="btn btn-brand" type="submit">Найти</button>
+      {% if q %}
+        <a class="btn btn-soft" href="{% url 'dashboard:products_list' %}">Сбросить</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="card products-table-card p-0">
+    {% if products %}
+      <div class="products-table-head">
+        <div class="products-table-title">Список товаров</div>
+        <div class="products-table-count">Найдено: <b>{{ products|length }}</b></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table-modern products-table">
+          <thead>
+            <tr>
+              <th style="width:90px;">ID</th>
+              <th>Название</th>
+              <th style="width:180px;">Категория</th>
+              <th style="width:140px;">Цена</th>
+              <th style="width:140px;">Главная</th>
+              <th style="width:230px;" class="text-end">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products %}
+            <tr>
+              <td>
+                <span class="product-id">#{{ p.id }}</span>
+              </td>
+
+              <td>
+                <div class="product-main">
+                  <div class="product-name">{{ p.name }}</div>
+                  <div class="product-meta">slug: {{ p.slug|default:"—" }}</div>
+                </div>
+              </td>
+
+              <td>
+                {% if p.category %}
+                  <span class="badge-soft">{{ p.category.name }}</span>
+                {% else %}
+                  <span class="badge-no">Без категории</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <span class="price">{{ p.price }} ₽</span>
+              </td>
+
+              <td>
+                {% if p.on_main_page %}
+                  <span class="badge-yes">Да</span>
+                {% else %}
+                  <span class="badge-no">Нет</span>
+                {% endif %}
+              </td>
+
+              <td class="text-end">
+                <div class="row-actions products-actions">
+                  <a class="btn btn-soft btn-action" href="{% url 'dashboard:product_edit' p.id %}">
+                    Редактировать
+                  </a>
+                  <a class="btn btn-action products-delete-btn" href="{% url 'dashboard:product_delete' p.id %}">
+                    Удалить
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-products">
+        <div class="empty-products-icon">📦</div>
+        <h5>Товаров пока нет</h5>
+        <p>Добавь первый товар, чтобы начать наполнять каталог</p>
+        <a class="btn btn-brand mt-2" href="{% url 'dashboard:product_create' %}">
+          ＋ Добавить товар
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<style>
+.products-page .products-top{
+  margin-bottom:18px;
+}
+
+.products-page .products-add-btn{
+  min-height:44px;
+}
+
+.products-page .products-search-card{
+  padding:14px;
+  margin-bottom:16px;
+}
+
+.products-page .products-search-row{
+  gap:10px;
+  align-items:center;
+}
+
+.products-page .products-search-input{
+  max-width:460px;
+}
+
+.products-page .products-table-card{
+  overflow:hidden;
+}
+
+.products-page .products-table-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 18px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, #fff 0%, #faf8fd 100%);
+  flex-wrap:wrap;
+}
+
+.products-page .products-table-title{
+  font-size:15px;
+  font-weight:900;
+  color:var(--text);
+  letter-spacing:-.01em;
+}
+
+.products-page .products-table-count{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.products-page .products-table-count b{
+  color:var(--text);
+}
+
+.products-page .products-table{
+  margin:0;
+}
+
+.products-page .product-id{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:54px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  font-size:12px;
+  font-weight:800;
+  color:var(--text);
+}
+
+.products-page .product-main{
+  min-width:0;
+}
+
+.products-page .product-name{
+  font-weight:900;
+  color:var(--text);
+  line-height:1.35;
+}
+
+.products-page .product-meta{
+  margin-top:4px;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.4;
+  word-break:break-all;
+}
+
+.products-page .products-actions{
+  justify-content:flex-end;
+}
+
+.products-page .products-delete-btn{
+  background:#fff;
+  color:var(--danger);
+  border:1px solid rgba(200,92,92,.22);
+  box-shadow:none;
+}
+
+.products-page .products-delete-btn:hover{
+  background:rgba(200,92,92,.08);
+  color:var(--danger);
+  border-color:rgba(200,92,92,.32);
+}
+
+.products-page .empty-products{
+  padding:46px 20px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.products-page .empty-products-icon{
+  font-size:44px;
+  line-height:1;
+  margin-bottom:8px;
+}
+
+.products-page .empty-products h5{
+  margin:10px 0 6px;
+  font-size:20px;
+  font-weight:900;
+  color:var(--text);
+}
+
+.products-page .empty-products p{
+  margin:0;
+  font-size:14px;
+  line-height:1.6;
+}
+
+@media (max-width:900px){
+  .products-page .products-search-input{
+    max-width:none;
+  }
+}
+
+@media (max-width:640px){
+  .products-page .products-table-head{
+    padding:14px;
+  }
+
+  .products-page .products-search-card{
+    padding:12px;
+  }
+
+  .products-page .products-actions{
+    justify-content:flex-start;
+  }
+
+  .products-page .products-delete-btn,
+  .products-page .btn-action{
+    width:100%;
+  }
+}
+</style>
+{% endblock %}

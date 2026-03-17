@@ -18,6 +18,6 @@ urlpatterns = [
     path("return/<int:order_id>/", views.return_request, name="return_request"),
     path("my-returns/", views.my_returns, name="my_returns"),
     path("confirm/", views.confirm_order, name="confirm_order"),
-
+    
 
 ]

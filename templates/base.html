@@ -1,881 +1,1054 @@
 {% load static %}
 {% load cart_filters %}
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes, viewport-fit=cover">
   <title>{% block title %}Магазин{% endblock %}</title>
 
-  
+  {% block extra_head %}{% endblock %}
 
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Ваш CSS -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
   <style>
-    :root {
-      --primary: #ff7a00;
-      --primary-dark: #e66d00;
-      --text-main: #222;
-      --text-muted: #666;
-      --border: #eaeaea;
-      --bg-light: #f9f9f9;
+    /* CSS переменные */
+    :root{
+      --bg-main:#F5F7FB;
+      --bg-soft:#F8FAFC;
+      --bg-card:#FFFFFF;
+      --bg-elev:#FFFFFF;
+      --accent:#7C69A7;
+      --accent-dark:#68558F;
+      --accent-soft:rgba(124,105,167,.12);
+      --text-main:#2B2F3A;
+      --text-soft:#596070;
+      --text-muted:#7B8394;
+      --border:#E7EBF3;
+      --border-strong:#D9DFEA;
+      --danger:#C85C5C;
+      --success:#3F7D5C;
+      --shadow-sm:0 8px 20px rgba(32,43,67,.06);
+      --shadow-md:0 14px 34px rgba(32,43,67,.08);
+      --shadow-lg:0 18px 46px rgba(32,43,67,.12);
+      --radius-sm:12px;
+      --radius-md:18px;
+      --radius-lg:24px;
     }
 
-    body {
-      background: #fff;
-      color: var(--text-main);
-      font-family: "Segoe UI", system-ui, sans-serif;
+    *{
+      box-sizing:border-box;
+      min-width:0;
     }
 
-    /* ===== HEADER ===== */
-    nav {
-      border-bottom: 1px solid var(--border);
-      background: #fff;
+    html{
+      scroll-behavior:smooth;
+      overflow-x:hidden;
     }
 
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    body{
+      margin:0;
+      width:100%;
+      max-width:100%;
+      overflow-x:hidden;
+      background:var(--bg-main);
+      color:var(--text-main);
+      font-family:"Segoe UI", system-ui, sans-serif;
     }
 
-    .logo {
-      max-width: 110px;
-      height: 60px;
-      object-fit: contain;
+    body.menu-open{
+      overflow:hidden;
+      touch-action:none;
     }
 
+    a{ color:inherit; text-decoration:none; }
+    img{ max-width:100%; display:block; }
+    svg{ flex:0 0 auto; }
 
-
-
-
-
-/* Стили для гамбургера */
-.hamburger {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 10px;
-    z-index: 1001;
-    position: relative;
-}
-
-.hamburger-line {
-    display: block;
-    width: 25px;
-    height: 3px;
-    background: #333;
-    margin: 5px 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* Состояние активного гамбургера */
-.hamburger.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.hamburger.active .hamburger-line:nth-child(2) {
-    opacity: 0;
-}
-
-.hamburger.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
-}
-
-/* Оверлей */
-.nav-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 998;
-}
-
-.nav-overlay.active {
-    display: block;
-}
-
-/* Мобильная версия */
-@media (max-width: 768px) {
-    .hamburger {
-        display: block;
-    }
-    
-    .nav-links {
-        position: fixed;
-        top: 0;
-        right: -300px;
-        width: 250px;
-        height: 100vh;
-        background: white;
-        flex-direction: column;
-        padding: 80px 20px 20px;
-        transition: right 0.3s ease;
-        box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-        z-index: 1000;
-        overflow-y: auto;
-    }
-    
-    .nav-links.active {
-        right: 0;
-    }
-    
-    .nav-links a {
-        padding: 15px;
-        border-bottom: 1px solid #eee;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    .profile-menu {
-        position: static;
-        box-shadow: none;
-        width: 100%;
-        background: #f9f9f9;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 18px;
+    /* Шапка */
+    nav{
+      position:sticky;
+      top:0;
+      z-index:1000;
+      width:100%;
+      border-bottom:1px solid var(--border);
+      background:rgba(255,255,255,.88);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
     }
 
-    .nav-links a {
-      color: var(--text-main);
-      text-decoration: none;
-      font-weight: 500;
+    .nav-container{
+      width:100%;
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      position:relative;
     }
 
-    .nav-links a:hover {
-      color: var(--primary);
+    .nav-brand{
+      display:flex;
+      align-items:center;
+      flex:0 0 auto;
+      position:relative;
+      z-index:1301;
+      text-decoration:none;
     }
 
-    .cart-icon {
-      position: relative;
-      padding: 8px;
-      font-size: 20px;
+    .logo{
+      max-width:150px;
+      height:50px;
+      object-fit:contain;
     }
 
-    .cart-icon:hover {
-      color: var(--primary);
+    /* Десктопное меню */
+    .nav-links{
+      display:flex;
+      align-items:center;
+      gap:18px;
     }
 
-    /* ===== PROFILE MENU ===== */
-    .profile-wrapper {
-      position: relative;
+    .nav-links a,
+    .nav-link-btn{
+      color:var(--text-main);
+      text-decoration:none;
+      font-weight:600;
+      transition:.18s ease;
+      background:none;
+      border:none;
+      padding:0;
+      cursor:pointer;
     }
 
-    .profile-icon {
-      font-size: 18px;
-      cursor: pointer;
+    .nav-links a:hover,
+    .nav-link-btn:hover{
+      color:var(--accent);
     }
 
-    .profile-menu {
-      display: none;
-      position: absolute;
-      
-      top: 32px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      min-width: 180px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      z-index: 200;
+    /* Профиль */
+    .profile-wrapper{
+      position:relative;
+    }
+
+    .profile-toggle{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-width:38px;
+      height:38px;
+      padding:0 10px;
+      border-radius:999px;
+      background:transparent;
+      border:none;
+      cursor:pointer;
+      color:var(--text-main);
+      transition:.18s ease;
+      flex:0 0 auto;
+    }
+
+    .profile-toggle:hover{
+      background:var(--accent-soft);
+      color:var(--accent);
+    }
+
+    .profile-icon{
+      width:22px;
+      height:22px;
+      display:block;
+    }
+
+    .profile-toggle-text{
+      display:none;
+      font-size:15px;
+      font-weight:600;
+      line-height:1;
+    }
+
+    .profile-menu{
+      display:none;
+      position:absolute;
+      top:46px;
+      right:0;
+      min-width:220px;
+      background:var(--bg-elev);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow-md);
+      overflow:hidden;
+      z-index:1302;
+    }
+
+    .profile-menu.is-open{
+      display:block;
     }
 
     .profile-menu a,
-    .profile-menu button {
-      display: block;
-      width: 100%;
-      padding: 10px 14px;
-      text-align: left;
-      background: none;
-      border: none;
-      color: var(--text-main);
-      font-size: 14px;
-      cursor: pointer;
-      text-decoration: none;
+    .profile-menu button{
+      display:block;
+      width:100%;
+      padding:12px 14px;
+      text-align:left;
+      background:none;
+      border:none;
+      color:var(--text-main);
+      font-size:14px;
+      cursor:pointer;
+      text-decoration:none;
+      transition:.15s ease;
     }
 
     .profile-menu a:hover,
-    .profile-menu button:hover {
-      background: var(--bg-light);
-      color: var(--primary);
+    .profile-menu button:hover{
+      background:var(--accent-soft);
+      color:var(--accent);
     }
 
-
-    .cart-count {
-    position: absolute;
-    top: 2px; /* Внутри иконки */
-    right: 2px;
-    
-    background: #ff4444;
-    color: white;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white; /* Белая обводка для контраста */
-}
-
-    /* ===== MAIN ===== */
-    main {
-      max-width: 1200px;
-      margin: 24px auto;
-      padding: 0 16px;
+    /* Гамбургер */
+    .hamburger{
+      display:none;
+      position:relative;
+      z-index:1500; /* Выше чем меню */
+      flex:0 0 auto;
+      width:44px;
+      height:44px;
+      padding:0;
+      border:none;
+      border-radius:14px;
+      background:#fff;
+      cursor:pointer;
+      box-shadow:0 4px 14px rgba(32,43,67,.08);
+      align-items:center;
+      justify-content:center;
     }
 
-    /* ===== FOOTER ===== */
-    footer {
-      margin-top: 60px;
-      padding: 20px 0;
-      background: var(--bg-light);
-      border-top: 1px solid var(--border);
-      text-align: center;
-      font-size: 14px;
-      color: var(--text-muted);
+    .hamburger:hover{
+      background:var(--accent-soft);
     }
 
-    footer a {
-      color: var(--text-muted);
-      margin: 0 8px;
-      text-decoration: none;
+    .hamburger-box{
+      width:24px;
+      height:18px;
+      position:relative;
+      display:block;
     }
 
-    footer a:hover {
-      color: var(--primary);
+    .hamburger-line{
+      position:absolute;
+      left:0;
+      width:24px;
+      height:3px;
+      border-radius:999px;
+      background:var(--text-main);
+      transition:transform .28s ease, opacity .22s ease, top .28s ease;
     }
 
+    .hamburger-line:nth-child(1){ top:0; }
+    .hamburger-line:nth-child(2){ top:7px; }
+    .hamburger-line:nth-child(3){ top:14px; }
 
-    .support-chat {
-    max-width: 800px;
-    margin: 40px auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
-    height: 70vh;
-}
-
-.support-chat__header {
-    padding: 16px 20px;
-    border-bottom: 1px solid #eee;
-    font-weight: 600;
-}
-
-.support-chat__messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background: #f9f9f9;
-}
-
-.support-message {
-    max-width: 70%;
-    padding: 12px 14px;
-    border-radius: 14px;
-    margin-bottom: 12px;
-    line-height: 1.4;
-    font-size: 14px;
-}
-
-.support-message.user {
-    background: #007bff;
-    color: #fff;
-    margin-left: auto;
-    border-bottom-right-radius: 4px;
-}
-
-.support-message.admin {
-    background: #e9ecef;
-    color: #333;
-    margin-right: auto;
-    border-bottom-left-radius: 4px;
-}
-
-.support-chat__form {
-    display: flex;
-    padding: 15px;
-    border-top: 1px solid #eee;
-    gap: 10px;
-}
-
-.support-chat__form input {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    outline: none;
-}
-
-.support-chat__form button {
-    padding: 12px 20px;
-    border-radius: 8px;
-    background: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-.support-chat__form button:hover {
-    background: #0056b3;
-}
-
-
-    /* Скрываем только если 0 */
-.cart-count[data-count="0"],
-.cart-count:contains("0") {
-    display: none !important;
-}
-
-/* Или с помощью JavaScript */
-.cart-count:empty {
-    display: none !important;
-}
-
-
-
-.support-fab {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    min-height: 56px;
-
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff7a00, #ff9a3c);
-    color: #fff;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 22px;
-    text-decoration: none;
-
-    box-shadow: 0 10px 25px rgba(255,122,0,0.45);
-    z-index: 1000;
-
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* hover только для десктопа */
-@media (hover: hover) {
-    .support-fab:hover {
-        transform: scale(1.1);
-        box-shadow: 0 14px 30px rgba(255,122,0,0.55);
-        color: #fff;
+    .hamburger.active .hamburger-line:nth-child(1){
+      top:7px;
+      transform:rotate(45deg);
     }
-}
-
-/* === MOBILE FIX === */
-@media (max-width: 768px) {
-    .support-fab {
-        bottom: 25px;
-        right: 16px;
-
-        width: 52px;
-        height: 52px;
-        min-width: 52px;
-        min-height: 52px;
-
-        font-size: 20px;
-    }
-}
-
-
-
-.floating-cart {
-    position: fixed;
-    right: 24px;
-    bottom: 90px;
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, #ff7a00, #ff9a3c);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    z-index: 9999;
-    transition: all 0.3s ease;
-}
-
-.floating-cart i {
-    font-size: 26px;
-}
-
-.floating-cart:hover {
-    
-    transform: scale(1.08);
-}
-
-.floating-cart__count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #dc3545;
-    color: white;
-    font-size: 14px;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 6px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-/* Мобилка */
-@media (max-width: 768px) {
-    .floating-cart {
-        width: 55px;
-        height: 55px;
-        right: 15px;
-        bottom: 90px;
+    .hamburger.active .hamburger-line:nth-child(2){ opacity:0; }
+    .hamburger.active .hamburger-line:nth-child(3){
+      top:7px;
+      transform:rotate(-45deg);
     }
 
-    .floating-cart i {
-        font-size: 22px;
+    /* Основной контент */
+    main{
+      width:100%;
+      max-width:1200px;
+      margin:28px auto;
+      padding:0 16px 110px;
     }
-}
 
-@keyframes pop {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.2); }
-    70% { transform: scale(0.95); }
-    100% { transform: scale(1); }
-}
+    /* Подвал */
+    footer{
+      margin-top:70px;
+      padding:24px 16px;
+      background:rgba(255,255,255,.78);
+      border-top:1px solid var(--border);
+      text-align:center;
+      font-size:14px;
+      color:var(--text-muted);
+    }
 
-.floating-cart.pop {
-    animation: pop 0.4s ease;
-}
+    footer a{
+      color:var(--text-soft);
+      margin:0 8px;
+      text-decoration:none;
+      transition:.18s ease;
+    }
 
+    footer a:hover{
+      color:var(--accent);
+    }
 
+    /* Иконки */
+    .icon{
+      width:18px;
+      height:18px;
+      stroke:currentColor;
+      fill:none;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      display:inline-block;
+    }
 
-/* ===== SVG Icons (универсально) ===== */
-.icon {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  display: inline-block;
-}
+    .icon-star{
+      width:16px;
+      height:16px;
+      fill:currentColor;
+      display:inline-block;
+    }
 
-.icon-star {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-  display: inline-block;
-}
+    .icon.bag-solid path{
+      fill:currentColor;
+      stroke:none;
+    }
 
+    /* Плавающие кнопки */
+    .support-fab,
+    .floating-cart{
+      position:fixed;
+      right:max(16px, env(safe-area-inset-right));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:56px;
+      height:56px;
+      min-width:56px;
+      min-height:56px;
+      border-radius:50%;
+      text-decoration:none;
+      color:#fff;
+      background:linear-gradient(135deg, var(--accent), #9785bf);
+      box-shadow:0 12px 28px rgba(124,105,167,.28);
+      z-index:1400;
+      transition:transform .2s ease, box-shadow .2s ease;
+      -webkit-tap-highlight-color:transparent;
+    }
 
-.icon.bag-solid path { fill: currentColor; stroke: none; }
+    .support-fab:hover,
+    .floating-cart:hover{
+      transform:scale(1.08);
+      color:#fff;
+      box-shadow:0 16px 34px rgba(124,105,167,.38);
+    }
 
+    .support-fab{
+      bottom:max(24px, env(safe-area-inset-bottom));
+      font-size:22px;
+    }
 
+    .floating-cart{
+      bottom:calc(max(24px, env(safe-area-inset-bottom)) + 68px);
+    }
 
-.floating-cart .icon{
-  width: 26px;
-  height: 26px;
-}
+    .floating-cart__count{
+      position:absolute;
+      top:-5px;
+      right:-5px;
+      min-width:22px;
+      height:22px;
+      padding:0 6px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--danger);
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      line-height:1;
+      border:2px solid var(--bg-card);
+    }
 
+    .floating-cart .icon{
+      width:26px;
+      height:26px;
+    }
 
+    @keyframes pop{
+      0%{ transform:scale(1); }
+      40%{ transform:scale(1.2); }
+      70%{ transform:scale(.95); }
+      100%{ transform:scale(1); }
+    }
 
-.profile-icon{
-  width: 22px;
-  height: 22px;
-  color: #111827; /* почти чёрный, мягче чем pure black */
-}
+    .floating-cart.pop{
+      animation:pop .4s ease;
+    }
+
+    /* Стили для авторизации */
+    .auth-shell{
+      min-height:calc(100vh - 140px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px 16px;
+    }
+
+    .auth-card{
+      width:100%;
+      max-width:520px;
+      background:var(--bg-elev);
+      border:1px solid var(--border);
+      border-radius:26px;
+      box-shadow:var(--shadow-lg);
+      padding:30px;
+    }
+
+    .auth-title{
+      margin:0 0 8px;
+      font-size:28px;
+      font-weight:800;
+      color:var(--text-main);
+      letter-spacing:-.02em;
+    }
+
+    .auth-subtitle{
+      margin:0 0 22px;
+      color:var(--text-muted);
+      font-size:15px;
+      line-height:1.6;
+    }
+
+    .auth-form .form-group{
+      margin-bottom:16px;
+    }
+
+    .auth-form label{
+      display:block;
+      margin-bottom:8px;
+      font-size:14px;
+      font-weight:700;
+      color:var(--text-main);
+    }
+
+    .auth-form input[type="email"],
+    .auth-form input[type="password"],
+    .auth-form input[type="text"]{
+      width:100%;
+      height:48px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:0 14px;
+      font-size:15px;
+      color:var(--text-main);
+      background:#fff;
+      outline:none;
+      transition:.15s ease;
+    }
+
+    .auth-form input[type="email"]:focus,
+    .auth-form input[type="password"]:focus,
+    .auth-form input[type="text"]:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(124,105,167,.14);
+    }
+
+    .auth-btn{
+      width:100%;
+      height:48px;
+      border:none;
+      border-radius:14px;
+      background:var(--accent);
+      color:#fff;
+      font-size:15px;
+      font-weight:700;
+      transition:.15s ease;
+    }
+
+    .auth-btn:hover{
+      background:var(--accent-dark);
+    }
+
+    .auth-btn:disabled{
+      opacity:.7;
+      cursor:not-allowed;
+    }
+
+    .auth-note{
+      margin-top:16px;
+      font-size:14px;
+      color:var(--text-muted);
+      line-height:1.5;
+    }
+
+    .auth-link{
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:700;
+    }
+
+    .auth-link:hover{
+      color:var(--accent-dark);
+      text-decoration:none;
+    }
+
+    .auth-success{
+      background:rgba(63,125,92,.10);
+      border:1px solid rgba(63,125,92,.18);
+      color:#29533e;
+      border-radius:16px;
+      padding:14px 16px;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .auth-info{
+      background:rgba(124,105,167,.10);
+      border:1px solid rgba(124,105,167,.18);
+      color:var(--accent-dark);
+      border-radius:16px;
+      padding:14px 16px;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .auth-errors{
+      margin:10px 0 0;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(200,92,92,.10);
+      color:#9f3f3f;
+      font-size:13px;
+    }
+
+    .auth-help{
+      margin-top:6px;
+      color:var(--text-muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .auth-actions{
+      margin-top:18px;
+    }
+
+    /* Мобильные стили — БЕЗ ОВЕРЛЕЯ */
+    @media (max-width:768px){
+      .nav-container{
+        padding:12px 14px;
+        gap:10px;
+      }
+
+      .logo{
+        max-width:128px;
+        height:42px;
+      }
+
+      .hamburger{
+        display:flex;
+      }
+
+      /* Мобильное меню — будет перекрывать лого */
+      .nav-links{
+        position:fixed;
+        top:0;
+        right:0;
+        width:min(84vw, 320px);
+        height:100dvh;
+        padding:80px 16px 24px;
+        display:flex;
+        flex-direction:column;
+        align-items:stretch;
+        gap:8px;
+        background:var(--bg-elev);
+        border-left:1px solid var(--border);
+        box-shadow:-8px 0 30px rgba(0,0,0,0.15);
+        overflow-y:auto;
+        transform:translateX(100%);
+        transition:transform 0.3s ease;
+        z-index:1400; /* Выше чем лого (1301) */
+        pointer-events:none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .nav-links.active{
+        transform:translateX(0);
+        pointer-events:auto;
+      }
+
+      /* Стили для пунктов меню */
+      .nav-links > a,
+      .nav-links .profile-wrapper {
+        width:100%;
+      }
+
+      .nav-links > a,
+      .nav-link-btn {
+        display:flex;
+        align-items:center;
+        justify-content:flex-start;
+        padding:14px 16px;
+        border-radius:14px;
+        font-weight:600;
+        background:transparent;
+        color:var(--text-main);
+        transition:background 0.2s;
+        cursor:pointer;
+        border:none;
+        width:100%;
+        text-decoration:none;
+      }
+
+      .nav-links > a:active,
+      .nav-link-btn:active {
+        background:var(--accent-soft);
+        color:var(--accent);
+      }
+
+      /* Стили для профиля в мобильном меню */
+      .profile-wrapper {
+        width:100%;
+      }
+
+      .profile-toggle {
+        width:100%;
+        height:auto;
+        min-width:0;
+        padding:14px 16px;
+        border-radius:14px;
+        justify-content:flex-start;
+        gap:12px;
+        background:transparent;
+        border:none;
+        cursor:pointer;
+        color:var(--text-main);
+      }
+
+      .profile-toggle:active {
+        background:var(--accent-soft);
+        color:var(--accent);
+      }
+
+      .profile-toggle-text {
+        display:inline-block;
+        font-size:16px;
+      }
+
+      .profile-menu {
+        position:static;
+        width:100%;
+        margin:4px 0 8px 0;
+        box-shadow:none;
+        border:1px solid var(--border);
+        background:var(--bg-soft);
+        border-radius:14px;
+        display:none;
+      }
+
+      .profile-menu.is-open {
+        display:block;
+      }
+
+      .profile-menu a,
+      .profile-menu button {
+        padding:12px 16px 12px 32px;
+      }
+
+      /* Коррекция плавающих кнопок */
+      .support-fab,
+      .floating-cart{
+        right:max(12px, env(safe-area-inset-right));
+        width:52px;
+        height:52px;
+        min-width:52px;
+        min-height:52px;
+      }
+
+      .support-fab{
+        bottom:max(14px, env(safe-area-inset-bottom));
+      }
+
+      .floating-cart{
+        bottom:calc(max(14px, env(safe-area-inset-bottom)) + 62px);
+      }
+
+      .floating-cart .icon{
+        width:24px;
+        height:24px;
+      }
+
+      .floating-cart__count{
+        min-width:20px;
+        height:20px;
+        font-size:12px;
+        top:-4px;
+        right:-4px;
+      }
+
+      main{
+        margin:22px auto;
+        padding:0 14px 90px;
+      }
+
+      footer{
+        padding:20px 14px;
+      }
+    }
+
+    /* Десктопное подавление мобильных стилей */
+    @media (min-width:769px){
+      .nav-links{
+        position:static !important;
+        width:auto !important;
+        height:auto !important;
+        padding:0 !important;
+        background:transparent !important;
+        border:none !important;
+        box-shadow:none !important;
+        transform:none !important;
+        pointer-events:auto !important;
+        opacity:1 !important;
+        visibility:visible !important;
+        overflow:visible !important;
+      }
+
+      .profile-toggle-text{
+        display:none;
+      }
+
+      .profile-menu{
+        position:absolute;
+      }
+    }
+
+    @media (max-width:576px){
+      .auth-card{
+        padding:22px 18px;
+        border-radius:22px;
+      }
+
+      .auth-title{
+        font-size:24px;
+      }
+    }
   </style>
+
   {% block extra_css %}{% endblock %}
 </head>
 
 <body>
+  <nav>
+    <div class="nav-container">
+      <a href="{% url 'home' %}" class="nav-brand" aria-label="На главную">
+        <img src="{% static 'logo123.png' %}" alt="Логотип" class="logo">
+      </a>
 
+      <button class="hamburger" id="hamburger" type="button" aria-label="Меню" aria-expanded="false">
+        <span class="hamburger-box">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </span>
+      </button>
 
+      <div class="nav-links" id="navLinks">
+        <a href="{% url 'home' %}">Главная</a>
+        <a href="{% url 'catalog:product_list' %}">Каталог</a>
 
+        {% if user.is_authenticated %}
+          <div class="profile-wrapper">
+            <button class="profile-toggle" id="profileIcon" type="button" aria-label="Профиль" aria-expanded="false">
+              <svg class="profile-icon icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <circle cx="12" cy="9" r="3" fill="currentColor"/>
+                <path d="M7 18c0-2.8 3-4.5 5-4.5s5 1.7 5 4.5" fill="currentColor"/>
+              </svg>
+              <span class="profile-toggle-text">Профиль</span>
+            </button>
 
+            <div id="profileMenu" class="profile-menu">
+              <a href="{% url 'accounts:profile' %}">Профиль</a>
+              <a href="{% url 'orders:my_orders' %}">Мои заказы</a>
 
-
-<!-- ===== HEADER ===== -->
-<nav>
-  <div class="nav-container">
-
-    <!-- Лого -->
-    <img src="{% static 'new-logo.png' %}" alt="Логотип" class="logo">
-
-       <!-- Гамбургер кнопка для мобильных -->
-       <!-- Гамбургер кнопка -->
-    <button class="hamburger" id="hamburger" aria-label="Меню">
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-    </button>
-
-    <!-- Навигация -->
-    <div class="nav-links">
-      <a href="{% url 'home' %}">Главная</a>
-      <a href="{% url 'catalog:product_list' %}">Каталог</a>
-
-      
-
-     
-     
-
-
-      {% if user.is_authenticated %}
-        <div class="profile-wrapper">
-          
-         <svg
-  id="profileIcon"
-  class="profile-icon icon"
-  viewBox="0 0 24 24"
-  aria-hidden="true"
->
-  <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-  <circle cx="12" cy="9" r="3" fill="currentColor"/>
-  <path d="M7 18c0-2.8 3-4.5 5-4.5s5 1.7 5 4.5" fill="currentColor"/>
-</svg>
-
-
-
-
-          <div id="profileMenu" class="profile-menu">
-            <a href="{% url 'accounts:profile' %}">Профиль</a>
-            <a href="{% url 'orders:my_orders' %}">Мои заказы</a>
-
-            <form action="{% url 'accounts:logout' %}" method="post" style="margin:0;">
-              {% csrf_token %}
-              <button type="submit">Выйти</button>
-            </form>
+              <form action="{% url 'accounts:logout' %}" method="post" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit">Выйти</button>
+              </form>
+            </div>
           </div>
-        </div>
-      {% else %}
-        <a href="{% url 'accounts:login' %}">Войти</a>
-        
-      {% endif %}
+        {% else %}
+          <a href="{% url 'accounts:login' %}">Войти</a>
+        {% endif %}
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<!-- ===== CONTENT ===== -->
-<main>
- 
+  <main>
+    {% block content %}{% endblock %}
+  </main>
 
-  {% block content %}{% endblock %}
-</main>
+  <footer>
+    © 2025 Зазеркалье ·
+    <a href="#">Политика конфиденциальности</a> ·
+    <a href="#">Оферта</a> ·
+    <a href="#">Персональные данные</a>
+  </footer>
 
-<!-- ===== FOOTER ===== -->
-<footer>
-  © 2025 Огонь Жизни ·
-  <a href="#">Политика конфиденциальности</a> ·
-  <a href="#">Оферта</a> ·
-  <a href="#">Персональные данные</a>
-</footer>
+  <a href="{% url 'orders:cart_detail' %}" class="floating-cart" aria-label="Корзина">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="6.5" y="8" width="11" height="12" rx="2.6" fill="currentColor"/>
+      <path d="M9 8V6.8a3 3 0 0 1 6 0V8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
 
-<!-- ===== SCRIPTS ===== -->
-<script>
-  const icon = document.getElementById("profileIcon");
-  const menu = document.getElementById("profileMenu");
+    {% with total_items=request.session.cart|cart_total_quantity %}
+      <span
+        id="cartBadge"
+        class="floating-cart__count"
+        style="{% if not total_items or total_items <= 0 %}display:none;{% endif %}"
+      >
+        {{ total_items|default:"0" }}
+      </span>
+    {% endwith %}
+  </a>
 
-  if (icon && menu) {
-    icon.addEventListener("click", function(event) {
-      event.stopPropagation();
-      menu.style.display = menu.style.display === "block" ? "none" : "block";
-    });
+  <a href="{% url 'support_chat' %}" class="support-fab" aria-label="Чат поддержки">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 4c-5 0-9 3.2-9 7.3 0 1.3.4 2.6 1.2 3.7L3 20l5.1-1.8c1.2.5 2.5.8 3.9.8 5 0 9-3.2 9-7.3S17 4 12 4Z"
+        fill="currentColor"
+      />
+      <path d="M8 11h8" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+      <path d="M8 14h5.5" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+    </svg>
+  </a>
 
-    document.addEventListener("click", function(e) {
-      if (!menu.contains(e.target) && e.target !== icon) {
-        menu.style.display = "none";
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const body = document.body;
+      const hamburger = document.getElementById("hamburger");
+      const navLinks = document.getElementById("navLinks");
+      const profileIcon = document.getElementById("profileIcon");
+      const profileMenu = document.getElementById("profileMenu");
+
+      // Функции для меню
+      function openMenu() {
+        if (!hamburger || !navLinks) return;
+        hamburger.classList.add("active");
+        navLinks.classList.add("active");
+        hamburger.setAttribute("aria-expanded", "true");
+        body.classList.add("menu-open");
+        closeMenuProfile();
       }
-    });
 
+      function closeMenu() {
+        if (!hamburger || !navLinks) return;
+        hamburger.classList.remove("active");
+        navLinks.classList.remove("active");
+        hamburger.setAttribute("aria-expanded", "false");
+        body.classList.remove("menu-open");
+      }
 
-
-
-
-
-
-
-    function togglePassword() {
-  const input = document.getElementById("password");
-  input.type = input.type === "password" ? "text" : "password";
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  const phoneInput = document.getElementById("phone");
-
-  if (!phoneInput) return;
-
-  phoneInput.addEventListener("input", function () {
-    let x = phoneInput.value.replace(/\D/g, '').slice(0, 11);
-    if (x.startsWith("8")) x = "7" + x.slice(1);
-    if (!x.startsWith("7")) x = "7" + x;
-
-    let formatted = "+7";
-    if (x.length > 1) formatted += " (" + x.slice(1, 4);
-    if (x.length >= 5) formatted += ") " + x.slice(4, 7);
-    if (x.length >= 8) formatted += "-" + x.slice(7, 9);
-    if (x.length >= 10) formatted += "-" + x.slice(9, 11);
-
-    phoneInput.value = formatted;
-  });
-});
-  }
-
-  
-
-
-  // Ждем полной загрузки DOM
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== ДЕБАГ ГАМБУРГЕРА ===');
-    
-    // Ищем элементы РАЗНЫМИ способами
-    let hamburger = document.getElementById('hamburger');
-    let navLinks = document.getElementById('navLinks');
-    
-    // Если не нашли по ID, ищем по классу
-    if (!hamburger) {
-        hamburger = document.querySelector('.hamburger');
-        console.log('Ищу по классу .hamburger:', hamburger);
-    }
-    
-    if (!navLinks) {
-        navLinks = document.querySelector('.nav-links');
-        console.log('Ищу по классу .nav-links:', navLinks);
-    }
-    
-    // Если все еще не нашли
-    if (!hamburger) {
-        hamburger = document.querySelector('nav button');
-        console.log('Ищу любую кнопку в nav:', hamburger);
-    }
-    
-    if (!navLinks) {
-        navLinks = document.querySelector('nav > div');
-        console.log('Ищу любой div в nav:', navLinks);
-    }
-    
-    // Выводим что нашли
-    console.log('Найдено hamburger:', hamburger);
-    console.log('Найдено navLinks:', navLinks);
-    console.log('HTML страницы:', document.body.innerHTML.substring(0, 1000));
-    
-    // Если элементы не найдены - создаем их
-    if (!hamburger || !navLinks) {
-        console.error('Элементы не найдены! Проверьте HTML структуру.');
-        
-        // Покажем предупреждение пользователю
-        const nav = document.querySelector('nav');
-        if (nav) {
-            console.log('Найден nav:', nav.outerHTML);
+      function toggleMenu() {
+        if (!navLinks) return;
+        if (navLinks.classList.contains("active")) {
+          closeMenu();
+        } else {
+          openMenu();
         }
-        return;
-    }
-    
-    console.log('✅ Элементы найдены, инициализируем гамбургер...');
-    
-    // Создаем оверлей если нет
-    let navOverlay = document.getElementById('navOverlay');
-    if (!navOverlay) {
-        navOverlay = document.createElement('div');
-        navOverlay.id = 'navOverlay';
-        navOverlay.className = 'nav-overlay';
-        document.body.appendChild(navOverlay);
-        console.log('Создан оверлей');
-    }
-    
-    // Функция переключения
-    function toggleMenu() {
-        console.log('toggleMenu вызвана');
-        navLinks.classList.toggle('active');
-        hamburger.classList.toggle('active');
-        navOverlay.classList.toggle('active');
-        document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
-    }
-    
-    // Вешаем обработчик
-    hamburger.addEventListener('click', toggleMenu);
-    navOverlay.addEventListener('click', toggleMenu);
-    
-    console.log('✅ Гамбургер инициализирован!');
-});
-  
-function animateCart() {
-    const cart = document.querySelector('.floating-cart');
-    if (!cart) return;
-    cart.classList.add('pop');
-    setTimeout(() => cart.classList.remove('pop'), 400);
-}
+      }
 
+      // Функции для профиля
+      function openMenuProfile() {
+        if (!profileIcon || !profileMenu) return;
+        profileMenu.classList.add("is-open");
+        profileIcon.setAttribute("aria-expanded", "true");
+      }
 
+      function closeMenuProfile() {
+        if (!profileIcon || !profileMenu) return;
+        profileMenu.classList.remove("is-open");
+        profileIcon.setAttribute("aria-expanded", "false");
+      }
 
+      function toggleMenuProfile(event) {
+        event.stopPropagation();
+        
+        if (!profileMenu) return;
 
-(function () {
-  function getCookie(name) {
-    const v = `; ${document.cookie}`;
-    const parts = v.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-  }
+        if (profileMenu.classList.contains("is-open")) {
+          closeMenuProfile();
+        } else {
+          openMenuProfile();
+        }
+      }
 
-  function showToast(text) {
-    let t = document.getElementById("toastCart");
-    if (!t) {
-      t = document.createElement("div");
-      t.id = "toastCart";
-      t.style.cssText = `
-        position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
-        background: #111827; color: #fff;
-        padding: 10px 12px; border-radius: 999px;
-        font-size: 13px; box-shadow: 0 12px 30px rgba(0,0,0,.22);
-        opacity: 0; transition: opacity .18s ease, transform .18s ease;
-        z-index: 9999;
-      `;
-      document.body.appendChild(t);
-    }
-    t.textContent = text;
-    t.style.opacity = "1";
-    t.style.transform = "translateX(-50%) translateY(-2px)";
-    clearTimeout(window.__toastTimer);
-    window.__toastTimer = setTimeout(() => {
-      t.style.opacity = "0";
-      t.style.transform = "translateX(-50%) translateY(0)";
-    }, 1400);
-  }
-
-  function setCartBadge(qty) {
-    // поставь у себя в navbar элемент со счётчиком, например:
-    // <span id="cartBadge">0</span>
-    const badge = document.getElementById("cartBadge");
-    if (!badge) return;
-    badge.textContent = qty;
-    badge.style.display = (qty && qty > 0) ? "inline-flex" : "none";
-  }
-
-  document.addEventListener("submit", async function (e) {
-    const form = e.target.closest("form.js-add-to-cart");
-    if (!form) return;
-
-    e.preventDefault();
-
-    const btn = form.querySelector('button[type="submit"]');
-    const oldHtml = btn ? btn.innerHTML : null;
-    if (btn) btn.disabled = true;
-
-    try {
-      const res = await fetch(form.action, {
-        method: "POST",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRFToken": getCookie("csrftoken"),
-        },
-        body: new FormData(form),
+      // Обработчики событий
+      hamburger?.addEventListener("click", function (event) {
+        event.stopPropagation();
+        toggleMenu();
       });
 
-      const data = await res.json();
+      // Закрытие меню при клике вне его
+      document.addEventListener("click", function (e) {
+        if (navLinks?.classList.contains("active")) {
+          // Если клик не по меню и не по гамбургеру
+          if (!navLinks.contains(e.target) && !hamburger?.contains(e.target)) {
+            closeMenu();
+            closeMenuProfile();
+          }
+        }
+      });
 
-      if (data.ok) {
-        setCartBadge(data.cart_qty);
-        showToast(data.message || "Добавлено в корзину");
-      } else {
-        showToast("Не удалось добавить в корзину");
-      }
-    } catch (err) {
-      showToast("Ошибка сети");
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        if (oldHtml !== null) btn.innerHTML = oldHtml;
-      }
+      // Обработка кликов по ссылкам в меню
+      const menuLinks = navLinks?.querySelectorAll('a[href]');
+      menuLinks?.forEach(link => {
+        link.addEventListener('click', function(e) {
+          setTimeout(() => {
+            closeMenu();
+            closeMenuProfile();
+          }, 100);
+        });
+      });
+
+      // Обработка клика по кнопке профиля
+      profileIcon?.addEventListener("click", toggleMenuProfile);
+
+      // Закрытие профиля при клике вне его
+      document.addEventListener("click", function (e) {
+        if (profileMenu && profileIcon) {
+          const clickedInsideMenu = profileMenu.contains(e.target);
+          const clickedProfileButton = profileIcon.contains(e.target);
+
+          if (!clickedInsideMenu && !clickedProfileButton) {
+            closeMenuProfile();
+          }
+        }
+      });
+
+      // Закрытие по ESC
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          closeMenu();
+          closeMenuProfile();
+        }
+      });
+
+      // Сброс состояния при ресайзе
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 768) {
+          closeMenu();
+          closeMenuProfile();
+        }
+      });
+    });
+
+    // Функция анимации корзины
+    function animateCart() {
+      const cart = document.querySelector(".floating-cart");
+      if (!cart) return;
+      cart.classList.add("pop");
+      setTimeout(() => cart.classList.remove("pop"), 400);
     }
-  });
-})();
 
+    // AJAX для корзины
+    (function () {
+      function getCookie(name) {
+        const v = `; ${document.cookie}`;
+        const parts = v.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return null;
+      }
 
-</script>
+      function showToast(text) {
+        let t = document.getElementById("toastCart");
+        if (!t) {
+          t = document.createElement("div");
+          t.id = "toastCart";
+          t.style.cssText = `
+            position: fixed;
+            left: 50%;
+            bottom: calc(max(16px, env(safe-area-inset-bottom)) + 4px);
+            transform: translateX(-50%);
+            background: #2B2F3A;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.22);
+            opacity: 0;
+            transition: opacity .18s ease, transform .18s ease;
+            z-index: 9999;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+            white-space: nowrap;
+          `;
+          document.body.appendChild(t);
+        }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-{% block extra_js %}{% endblock %}
+        t.textContent = text;
+        t.style.opacity = "1";
+        t.style.transform = "translateX(-50%) translateY(-2px)";
 
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          t.style.opacity = "0";
+          t.style.transform = "translateX(-50%) translateY(0)";
+        }, 1400);
+      }
 
-<a href="{% url 'orders:cart_detail' %}" class="floating-cart">
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-  <!-- корпус: ровный верх/низ, мягкие углы -->
-  <rect x="6.5" y="8" width="11" height="12" rx="2.6" fill="currentColor"/>
-  <!-- ручка -->
-  <path d="M9 8V6.8a3 3 0 0 1 6 0V8"
-        stroke="currentColor" stroke-width="2"
-        fill="none" stroke-linecap="round"/>
-</svg>
+      function setCartBadge(qty) {
+        const badge = document.getElementById("cartBadge");
+        if (!badge) return;
+        badge.textContent = qty;
+        badge.style.display = (qty && parseInt(qty) > 0) ? "flex" : "none";
+      }
 
+      document.addEventListener("submit", async function (e) {
+        const form = e.target.closest("form.js-add-to-cart");
+        if (!form) return;
 
+        e.preventDefault();
 
+        const btn = form.querySelector('button[type="submit"]');
+        const oldHtml = btn ? btn.innerHTML : null;
 
-    {# Счётчик всегда в DOM #}
-  {% with total_items=request.session.cart|cart_total_quantity %}
-    <span
-      id="cartBadge"
-      class="floating-cart__count"
-      style="{% if not total_items or total_items <= 0 %}display:none;{% endif %}"
-    >
-      {{ total_items|default:"0" }}
-    </span>
-  {% endwith %}
-</a>
+        if (btn) btn.disabled = true;
 
+        try {
+          const res = await fetch(form.action, {
+            method: "POST",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: new FormData(form),
+          });
 
+          const data = await res.json();
 
-     <a href="{% url 'support_chat' %}" class="support-fab">
-  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-  <path
-    d="M12 4c-5 0-9 3.2-9 7.3 0 1.3.4 2.6 1.2 3.7L3 20l5.1-1.8c1.2.5 2.5.8 3.9.8 5 0 9-3.2 9-7.3S17 4 12 4Z"
-    fill="currentColor"
-  />
-  <path d="M8 11h8" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-  <path d="M8 14h5.5" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-</svg>
+          if (data.ok) {
+            setCartBadge(data.cart_qty);
+            animateCart();
+            showToast(data.message || "Добавлено в корзину");
+          } else {
+            showToast("Не удалось добавить в корзину");
+          }
+        } catch (err) {
+          showToast("Ошибка сети");
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            if (oldHtml !== null) btn.innerHTML = oldHtml;
+          }
+        }
+      });
+    })();
+  </script>
 
-
-
-</a>
-
-
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

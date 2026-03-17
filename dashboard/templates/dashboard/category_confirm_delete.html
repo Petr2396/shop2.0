@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Удалить категорию{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top:0;">Удалить категорию</h1>
+
+  <div class="card" style="max-width:720px;">
+    <p>Точно удалить категорию: <b>{{ category.name }}</b>?</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn" type="submit" style="background:#dc2626;">Удалить</button>
+      <a href="{% url 'dashboard:categories_list' %}" style="margin-left:12px;">Отмена</a>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Удалить товар{% endblock %}
+{% block content %}
+
+<div class="chat-head">
+  <div>
+    <h3>Удалить товар</h3>
+    <div class="chat-sub">Действие необратимо</div>
+  </div>
+  <a class="btn btn-soft" href="{% url 'dashboard:products_list' %}">← Назад</a>
+</div>
+
+<div class="card p-3" style="max-width: 720px;">
+  <p style="margin:0 0 10px;">
+    Точно удалить товар: <b>{{ product.name }}</b>?
+  </p>
+  <div class="muted small" style="margin-bottom:14px;">
+    ID: #{{ product.id }} · Цена: {{ product.price }} ₽
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-danger" type="submit">Удалить</button>
+    <a class="btn btn-soft" style="margin-left:10px;" href="{% url 'dashboard:products_list' %}">Отмена</a>
+  </form>
+</div>
+
+{% endblock %}

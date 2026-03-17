@@ -2,65 +2,247 @@
 {% block title %}Редактировать профиль{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
+<div class="profile-edit-page">
+  <div class="edit-shell">
 
-      <!-- Карточка формы -->
-      <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-5">
+    <div class="edit-card">
 
-          <h2 class="fw-bold text-center mb-4">Редактирование профиля</h2>
-
-          <form method="post" enctype="multipart/form-data" class="needs-validation">
-            {% csrf_token %}
-
-            <div class="mb-3">
-              <label class="form-label">Имя</label>
-              {{ user_form.first_name }}
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Фамилия</label>
-              {{ user_form.last_name }}
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              {{ user_form.email }}
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Телефон</label>
-              {{ profile_form.phone }}
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Адрес</label>
-              {{ profile_form.address }}
-            </div>
-
-
-            <div class="mb-3">
-              <label class="form-label">Аватар</label><br>
-              {{ profile_form.avatar }}
-            </div>
-
-            <div class="d-flex justify-content-between mt-4">
-              <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Назад
-              </a>
-              <button type="submit" class="btn btn-success px-4">
-                <i class="fas fa-save"></i> Сохранить изменения
-              </button>
-            </div>
-
-          </form>
-
-        </div>
+      <div class="edit-header">
+        <h2 class="edit-title">Редактирование профиля</h2>
+        <p class="edit-subtitle">Измените данные вашего аккаунта</p>
       </div>
 
+      <form method="post" enctype="multipart/form-data" class="edit-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">Имя</label>
+          {{ user_form.first_name }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Фамилия</label>
+          {{ user_form.last_name }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          {{ user_form.email }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Телефон</label>
+          {{ profile_form.phone }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Адрес</label>
+          {{ profile_form.address }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Аватар</label>
+          {{ profile_form.avatar }}
+        </div>
+
+        <div class="form-actions">
+          <a href="{% url 'accounts:profile' %}" class="btn-secondary">
+            ← Назад
+          </a>
+
+          <button type="submit" class="btn-primary">
+            Сохранить изменения
+          </button>
+        </div>
+
+      </form>
     </div>
+
   </div>
 </div>
+
+<style>
+.profile-edit-page{
+  --surface:#FFFFFF;
+  --surface-2:#F8F6FC;
+  --surface-3:#F4F1FA;
+  --accent:#7C69A7;
+  --accent-dark:#68558F;
+  --accent-soft:rgba(124,105,167,.10);
+  --text:#262330;
+  --muted:#7C768C;
+  --line:#E8E3F1;
+  --line-strong:#D9D0E8;
+  --shadow-sm:0 10px 24px rgba(54,42,84,.06);
+  --shadow-md:0 16px 34px rgba(54,42,84,.08);
+  --shadow-lg:0 20px 46px rgba(54,42,84,.10);
+}
+
+.profile-edit-page,
+.profile-edit-page *{
+  box-sizing:border-box;
+}
+
+.edit-shell{
+  max-width:640px;
+  margin:40px auto 60px;
+  padding:0 14px;
+}
+
+.edit-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:28px;
+  box-shadow:var(--shadow-md);
+  overflow:hidden;
+}
+
+/* header */
+.edit-header{
+  padding:26px 28px 18px;
+  border-bottom:1px solid var(--line);
+  background:
+    radial-gradient(600px 200px at 10% 0%, rgba(124,105,167,.08), transparent 55%),
+    linear-gradient(180deg,#fff 0%,#faf8fd 100%);
+}
+
+.edit-title{
+  margin:0;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:-.02em;
+  color:var(--text);
+}
+
+.edit-subtitle{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* form */
+.edit-form{
+  padding:24px 28px 30px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+}
+
+.form-label{
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:6px;
+  color:var(--text);
+}
+
+.edit-form input,
+.edit-form textarea{
+  width:100%;
+  height:48px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  padding:0 14px;
+  font-size:14px;
+  color:var(--text);
+  background:#fff;
+  transition:.18s ease;
+}
+
+.edit-form textarea{
+  min-height:90px;
+  padding:10px 14px;
+  resize:vertical;
+}
+
+.edit-form input:focus,
+.edit-form textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(124,105,167,.12);
+}
+
+/* buttons */
+.form-actions{
+  margin-top:12px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.btn-primary{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:12px 22px;
+  font-weight:800;
+  font-size:14px;
+  cursor:pointer;
+  transition:.18s ease;
+  box-shadow:0 12px 22px rgba(124,105,167,.22);
+}
+
+.btn-primary:hover{
+  background:var(--accent-dark);
+  transform:translateY(-1px);
+}
+
+.btn-secondary{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  border-radius:999px;
+  padding:12px 18px;
+  text-decoration:none;
+  font-weight:700;
+  font-size:14px;
+  transition:.18s ease;
+}
+
+.btn-secondary:hover{
+  background:var(--surface-2);
+  color:var(--accent);
+  border-color:var(--line-strong);
+}
+
+/* mobile */
+@media (max-width:600px){
+
+  .edit-shell{
+    margin:20px auto 40px;
+  }
+
+  .edit-card{
+    border-radius:22px;
+  }
+
+  .edit-header{
+    padding:20px 20px 16px;
+  }
+
+  .edit-form{
+    padding:20px;
+  }
+
+  .edit-title{
+    font-size:24px;
+  }
+
+  .form-actions{
+    flex-direction:column;
+  }
+
+  .btn-primary,
+  .btn-secondary{
+    width:100%;
+    text-align:center;
+  }
+}
+</style>
 {% endblock %}

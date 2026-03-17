@@ -1,528 +1,790 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="cart-title">Корзина</h2>
 
 <style>
-:root {
-    --accent: #ff6a00;
-    --accent-soft: rgba(255,106,0,.12);
-    --accent-dark: #e55f00;
-    --bg-page: #fafafa;
-    --bg-card: #ffffff;
-    --text-main: #1f1f1f;
-    --text-muted: #777;
-    --border-soft: #ececec;
+.cart-page{
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-2:#F8F6FC;
+    --surface-3:#F4F1FA;
+    --accent:#7C69A7;
+    --accent-dark:#68558F;
+    --accent-soft:rgba(124,105,167,.10);
+    --text:#262330;
+    --muted:#7C768C;
+    --line:#E8E3F1;
+    --line-strong:#D9D0E8;
+    --danger:#C85C5C;
+    --success:#3F7D5C;
+    --shadow-sm:0 10px 24px rgba(54,42,84,.06);
+    --shadow-md:0 16px 34px rgba(54,42,84,.08);
+    --shadow-lg:0 20px 46px rgba(54,42,84,.10);
 }
 
-/* ===== Заголовок ===== */
-.cart-title {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 25px;
+.cart-page,
+.cart-page *{
+    box-sizing:border-box;
 }
 
-/* ===== Карточка таблицы ===== */
-.cart-card {
-    background: var(--bg-card);
-    border-radius: 18px;
-    box-shadow:
-        0 20px 40px rgba(0,0,0,.06),
-        inset 0 1px 0 rgba(255,255,255,.6);
-    padding: 10px;
+/* ===== PAGE HEAD ===== */
+.cart-page .cart-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
 }
 
-/* ===== Таблица ===== */
-.cart-table {
-    margin: 0;
+.cart-page .cart-title{
+    margin:0;
+    font-size:32px;
+    line-height:1.08;
+    font-weight:900;
+    letter-spacing:-.03em;
+    color:var(--text);
 }
 
-.cart-table thead th {
-    font-weight: 600;
-    color: var(--text-muted);
-    border-bottom: none;
-    padding: 18px;
+.cart-page .cart-subtitle{
+    margin-top:8px;
+    font-size:14px;
+    line-height:1.55;
+    color:var(--muted);
 }
 
-.cart-table tbody td {
-    padding: 18px;
-    border-top: 1px solid var(--border-soft);
-    font-size: 15px;
+/* ===== EMPTY ===== */
+.cart-page .cart-empty{
+    padding:42px 24px;
+    border:1px dashed var(--line-strong);
+    border-radius:24px;
+    background:linear-gradient(180deg, #fff 0%, #faf8fd 100%);
+    text-align:center;
+    color:var(--muted);
+    box-shadow:var(--shadow-sm);
 }
 
-.cart-table tbody tr:hover {
-    background: #fffaf5;
+.cart-page .cart-empty h3{
+    margin:0 0 8px;
+    font-size:24px;
+    font-weight:900;
+    color:var(--text);
+    letter-spacing:-.02em;
 }
 
-/* ===== Название товара ===== */
-.cart-product {
-    font-weight: 600;
+.cart-page .cart-empty p{
+    margin:0;
+    font-size:15px;
+    line-height:1.7;
 }
 
-/* ===== Количество ===== */
-.quantity-controls {
-    display: inline-flex;
-    align-items: center;
-    background: var(--accent-soft);
-    padding: 4px;
-    border-radius: 999px;
+.cart-page .cart-empty-actions{
+    margin-top:18px;
 }
 
-.quantity-btn {
-    width: 34px;
-    height: 34px;
-    border: none;
-    border-radius: 50%;
-    background: white;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--accent);
-    cursor: pointer;
-    transition: all .2s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+.cart-page .cart-empty-link{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:48px;
+    padding:0 20px;
+    border-radius:999px;
+    text-decoration:none;
+    background:var(--accent);
+    color:#fff;
+    font-weight:800;
+    transition:.18s ease;
+    box-shadow:0 12px 24px rgba(124,105,167,.20);
 }
 
-.quantity-btn:hover {
-    background: var(--accent);
-    color: white;
-    transform: scale(1.1);
+.cart-page .cart-empty-link:hover{
+    background:var(--accent-dark);
+    color:#fff;
+    transform:translateY(-1px);
 }
 
-.quantity-input {
-    width: 42px;
-    border: none;
-    background: transparent;
-    font-weight: 600;
-    text-align: center;
-    color: var(--text-main);
+/* ===== CARD ===== */
+.cart-page .cart-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:28px;
+    box-shadow:var(--shadow-md);
+    overflow:hidden;
 }
 
-/* ===== Цена ===== */
-.cart-price {
-    font-weight: 600;
+/* ===== TABLE DESKTOP ===== */
+.cart-page .cart-table-wrap{
+    width:100%;
+    overflow-x:auto;
 }
 
-/* ===== Удаление ===== */
-.cart-remove {
-    color: #bbb;
-    font-size: 20px;
-    transition: all .2s ease;
+.cart-page .cart-table{
+    margin:0;
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    min-width:720px;
 }
 
-.cart-remove:hover {
-    color: #ff3b3b;
-    transform: rotate(90deg) scale(1.2);
+.cart-page .cart-table thead th{
+    padding:20px 18px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, #fff 0%, #faf8fd 100%);
+    color:var(--muted);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    white-space:nowrap;
 }
 
-/* ===== Итог ===== */
-.cart-summary {
-    margin-top: 30px;
-    padding: 26px 30px;
-   
-    border-radius: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
+.cart-page .cart-table tbody td{
+    padding:18px;
+    border-top:1px solid var(--line);
+    vertical-align:middle;
+    font-size:15px;
+    color:var(--text);
+    background:#fff;
 }
 
-.cart-summary span {
-    font-size: 18px;
-    color: var(--text-muted);
+.cart-page .cart-table tbody tr:first-child td{
+    border-top:none;
 }
 
-.cart-summary strong {
-    font-size: 26px;
-    color: var(--accent);
+.cart-page .cart-table tbody tr{
+    transition:background .18s ease, opacity .18s ease;
 }
 
-/* ===== Промокод ===== */
-.promo-box {
-    margin-top: 35px;
-    padding: 25px;
-    background: var(--bg-card);
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,.05);
+.cart-page .cart-table tbody tr:hover td{
+    background:#fcfbfe;
 }
 
-.promo-box h5 {
-    font-weight: 700;
-    margin-bottom: 15px;
+/* ===== PRODUCT CELL ===== */
+.cart-page .cart-product-cell{
+    min-width:240px;
 }
 
-.promo-box .form-control {
-    border-radius: 999px;
-    padding: 12px 18px;
-    border: 1px solid var(--border-soft);
+.cart-page .cart-product{
+    display:flex;
+    align-items:center;
+    gap:14px;
 }
 
-.promo-box .btn {
-    border-radius: 999px;
-    padding: 10px 22px;
-    border: 2px solid var(--accent);
-    color: var(--accent);
-    font-weight: 600;
-    transition: all .2s ease;
+.cart-page .cart-product__image{
+    width:72px;
+    height:72px;
+    flex:0 0 72px;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg, #ffffff 0%, #f7f4fc 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px;
 }
 
-.promo-box .btn:hover {
-    background: var(--accent);
-    color: white;
+.cart-page .cart-product__image img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
 }
 
-/* ===== Кнопка ===== */
-.checkout-btn {
-    margin-top: 40px;
-    display: inline-block;
-    padding: 18px 44px;
-    background: linear-gradient(
-        135deg,
-        #ff6a00,
-        #ff8c1a
-    );
-    color: white;
-    font-size: 20px;
-    font-weight: 700;
-    border-radius: 999px;
-    text-decoration: none;
-    box-shadow:
-        0 18px 45px rgba(255,106,0,.45);
-    transition: all .25s ease;
+.cart-page .cart-product__info{
+    min-width:0;
 }
 
-.checkout-btn:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 25px 55px rgba(255,106,0,.55);
+.cart-page .cart-product__name{
+    display:block;
+    font-size:15px;
+    font-weight:800;
+    line-height:1.4;
+    color:var(--text);
+    text-decoration:none;
 }
 
-/* ===== Обновление ===== */
-.updating {
-    opacity: .55;
-    pointer-events: none;
+.cart-page .cart-product__name:hover{
+    color:var(--accent);
 }
 
-
-
-/* ===== PROMO CARD ===== */
-.promo-card {
-    margin-top: 35px;
-    padding: 26px 28px;
-    
-    border-radius: 22px;
-    
+.cart-page .cart-product__meta{
+    margin-top:4px;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.45;
 }
 
-/* ===== HEADER ===== */
-.promo-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
+/* ===== PRICE ===== */
+.cart-page .cart-price,
+.cart-page .cart-item-total{
+    font-weight:800;
+    color:var(--text);
+    white-space:nowrap;
 }
 
-.promo-header h5 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
+/* ===== QUANTITY ===== */
+.cart-page .quantity-controls{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px;
+    border-radius:999px;
+    background:var(--accent-soft);
+    border:1px solid rgba(124,105,167,.08);
 }
 
-.promo-icon {
-    font-size: 22px;
+.cart-page .quantity-btn{
+    width:36px;
+    height:36px;
+    border:none;
+    border-radius:50%;
+    background:#fff;
+    color:var(--accent);
+    font-size:18px;
+    font-weight:800;
+    line-height:1;
+    cursor:pointer;
+    transition:.18s ease;
+    box-shadow:0 4px 10px rgba(54,42,84,.08);
 }
 
-/* ===== INPUT ===== */
-.promo-input-wrap {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+.cart-page .quantity-btn:hover{
+    background:var(--accent);
+    color:#fff;
+    transform:scale(1.05);
 }
 
-.promo-input {
-    flex: 1;
-    padding: 14px 20px;
-    border-radius: 999px;
-    border: 1px solid #eee;
-    font-size: 15px;
-    transition: all .2s ease;
-}
-
-.promo-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(255,106,0,.15);
-}
-
-/* ===== BUTTON ===== */
-.promo-btn {
-    padding: 14px 28px;
-    border-radius: 999px;
-    border: none;
-    background: linear-gradient(
-        135deg,
-        #ff6a00,
-        #ff8c1a
-    );
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all .25s ease;
-    box-shadow: 0 10px 30px rgba(255,106,0,.45);
-}
-
-.promo-btn:hover {
-    transform: translateY(-2px) scale(1.04);
-    box-shadow: 0 16px 40px rgba(255,106,0,.55);
-}
-
-/* ===== MESSAGE ===== */
-.promo-message {
-    margin-top: 14px;
-    font-size: 14px;
-}
-
-.promo-message .text-success {
-    color: #2e7d32;
-}
-
-.promo-message .text-danger {
-    color: #d32f2f;
-}
-
-/* ===== APPLIED ===== */
-.promo-applied {
-    margin-top: 18px;
-    padding: 14px 18px;
-    background: rgba(255,106,0,.1);
-    border-radius: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
-}
-
-.promo-applied strong {
-    color: var(--accent);
+.cart-page .quantity-input{
+    width:42px;
+    border:none;
+    background:transparent;
+    text-align:center;
+    font-size:14px;
+    font-weight:800;
+    color:var(--text);
+    outline:none;
 }
 
 /* ===== REMOVE ===== */
-.promo-remove {
-    background: none;
-    border: none;
-    color: #ff3b3b;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .2s ease;
+.cart-page .cart-remove{
+    width:38px;
+    height:38px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    color:#a69fb7;
+    text-decoration:none;
+    transition:.18s ease;
 }
 
-.promo-remove:hover {
-    transform: scale(1.1);
+.cart-page .cart-remove:hover{
+    color:var(--danger);
+    background:rgba(200,92,92,.08);
+    transform:rotate(90deg);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.cart-footer {
-    margin-top: 25px;
-    padding: 16px;
-    background: #fff;
-    border-top: 1px solid #eee;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    align-items: center;
-    justify-content: space-between;
+/* ===== FOOTER ===== */
+.cart-page .cart-footer{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:1.1fr auto auto;
+    gap:16px;
+    align-items:center;
+    padding:20px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:28px;
+    box-shadow:var(--shadow-md);
 }
 
-.cart-footer__promo {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+.cart-page .cart-footer__promo{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    gap:10px;
+    min-width:0;
 }
 
-.cart-footer__promo input {
-    height: 38px;
-    padding: 0 14px;
-    border-radius: 999px;
-    border: 1px solid #ddd;
+.cart-page .cart-footer__promo input{
+    height:46px;
+    min-width:240px;
+    padding:0 16px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--text);
+    outline:none;
+    transition:.18s ease;
 }
 
-.cart-footer__promo button {
-    height: 38px;
-    padding: 0 16px;
-    border-radius: 999px;
-    border: none;
-    background: #ff6a00;
-    color: white;
-    font-weight: 600;
+.cart-page .cart-footer__promo input::placeholder{
+    color:#9b94ab;
 }
 
-.cart-footer__total {
-    font-size: 18px;
-    font-weight: 700;
+.cart-page .cart-footer__promo input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(124,105,167,.12);
 }
 
-.cart-footer__checkout {
-    padding: 12px 22px;
-    border-radius: 999px;
-    background: #ff6a00;
-    color: white;
-    font-weight: 700;
-    text-decoration: none;
+.cart-page .cart-footer__promo button{
+    height:46px;
+    padding:0 18px;
+    border:none;
+    border-radius:999px;
+    background:var(--accent);
+    color:#fff;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.18s ease;
+    box-shadow:0 10px 20px rgba(124,105,167,.18);
 }
 
+.cart-page .cart-footer__promo button:hover{
+    background:var(--accent-dark);
+    transform:translateY(-1px);
+}
 
+.cart-page .cart-footer__total{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    white-space:nowrap;
+    font-size:16px;
+    font-weight:700;
+    color:var(--text);
+}
 
+.cart-page .cart-footer__total strong{
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:-.03em;
+    color:var(--accent);
+}
+
+.cart-page .cart-footer__checkout{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:50px;
+    padding:0 22px;
+    border-radius:999px;
+    background:var(--accent);
+    color:#fff;
+    font-weight:800;
+    text-decoration:none;
+    white-space:nowrap;
+    transition:.18s ease;
+    box-shadow:0 12px 24px rgba(124,105,167,.22);
+}
+
+.cart-page .cart-footer__checkout:hover{
+    background:var(--accent-dark);
+    color:#fff;
+    transform:translateY(-1px);
+}
+
+/* ===== PROMO MESSAGE ===== */
+.cart-page .promo-message{
+    width:100%;
+    margin-top:2px;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.cart-page .promo-message .text-success{
+    display:inline-block;
+    padding:10px 12px;
+    border-radius:14px;
+    color:var(--success);
+    background:rgba(63,125,92,.10);
+    border:1px solid rgba(63,125,92,.16);
+}
+
+.cart-page .promo-message .text-danger{
+    display:inline-block;
+    padding:10px 12px;
+    border-radius:14px;
+    color:#9f3f3f;
+    background:rgba(200,92,92,.10);
+    border:1px solid rgba(200,92,92,.16);
+}
+
+/* ===== STATES ===== */
+.cart-page .updating{
+    opacity:.55;
+    pointer-events:none;
+}
+
+/* ===== MOBILE CARDS ===== */
+.cart-page .cart-mobile{
+    display:none;
+    gap:12px;
+}
+
+.cart-page .cart-mobile-item{
+    padding:14px;
+    border-top:1px solid var(--line);
+    background:#fff;
+}
+
+.cart-page .cart-mobile-item:first-child{
+    border-top:none;
+}
+
+.cart-page .cart-mobile-top{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+}
+
+.cart-page .cart-mobile-image{
+    width:78px;
+    height:78px;
+    flex:0 0 78px;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg, #ffffff 0%, #f7f4fc 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px;
+}
+
+.cart-page .cart-mobile-image img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+}
+
+.cart-page .cart-mobile-info{
+    min-width:0;
+    flex:1;
+}
+
+.cart-page .cart-mobile-name{
+    font-size:15px;
+    font-weight:800;
+    line-height:1.38;
+    color:var(--text);
+    text-decoration:none;
+}
+
+.cart-page .cart-mobile-name:hover{
+    color:var(--accent);
+}
+
+.cart-page .cart-mobile-meta{
+    margin-top:4px;
+    font-size:13px;
+    color:var(--muted);
+}
+
+.cart-page .cart-mobile-row{
+    margin-top:12px;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.cart-page .cart-mobile-prices{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.cart-page .cart-mobile-prices span{
+    font-size:13px;
+    color:var(--muted);
+}
+
+.cart-page .cart-mobile-prices strong{
+    font-size:16px;
+    color:var(--text);
+    font-weight:900;
+}
+
+.cart-page .cart-mobile-actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:12px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:900px){
+    .cart-page .cart-footer{
+        grid-template-columns:1fr;
+        align-items:stretch;
+    }
+
+    .cart-page .cart-footer__total{
+        justify-content:space-between;
+    }
+
+    .cart-page .cart-footer__checkout{
+        width:100%;
+    }
+}
+
+@media (max-width:768px){
+    .cart-page .cart-title{
+        font-size:28px;
+    }
+
+    .cart-page .cart-card{
+        border-radius:22px;
+    }
+
+    .cart-page .cart-table-wrap{
+        display:none;
+    }
+
+    .cart-page .cart-mobile{
+        display:grid;
+    }
+
+    .cart-page .cart-footer{
+        padding:16px;
+        border-radius:22px;
+    }
+
+    .cart-page .cart-footer__promo input{
+        width:100%;
+        min-width:0;
+    }
+}
+
+@media (max-width:560px){
+    .cart-page .cart-title{
+        font-size:26px;
+    }
+
+    .cart-page .cart-subtitle{
+        font-size:13px;
+    }
+
+    .cart-page .cart-footer__total{
+        font-size:15px;
+    }
+
+    .cart-page .cart-footer__total strong{
+        font-size:24px;
+    }
+
+    .cart-page .quantity-btn{
+        width:34px;
+        height:34px;
+    }
+
+    .cart-page .quantity-input{
+        width:38px;
+    }
+}
 </style>
-<div class="cart-card">
-<table class="table cart-table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>Товар</th>
-            <th>Цена</th>
-            <th>Кол-во</th>
-            <th>Итого</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in cart %}
-        <tr id="item-{{ item.product.id }}">
-            <td class="cart-product">{{ item.product.name }}</td>
-            <td class="cart-price">{{ item.price }} ₽</td>
-            <td>
-                <div class="quantity-controls">
-                    <button class="quantity-btn" onclick="updateQuantity({{ item.product_id }}, -1)">-</button>
-                    <input type="number" class="quantity-input" id="qty-{{ item.product_id }}" 
-                           value="{{ item.quantity }}" min="1" max="99" readonly>
-                    <button class="quantity-btn" onclick="updateQuantity({{ item.product_id }}, 1)">+</button>
+
+<div class="cart-page">
+  <div class="cart-head">
+    <div>
+      <h2 class="cart-title">Корзина</h2>
+      <div class="cart-subtitle">
+        Проверьте товары, количество и итоговую сумму перед оформлением заказа
+      </div>
+    </div>
+  </div>
+
+  {% if cart %}
+    <div class="cart-card">
+
+      <div class="cart-table-wrap">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Товар</th>
+              <th>Цена</th>
+              <th>Кол-во</th>
+              <th>Итого</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart %}
+            <tr id="item-{{ item.product.id }}">
+              <td class="cart-product-cell">
+                <div class="cart-product">
+                  <div class="cart-product__image">
+                    {% if item.product.images.first %}
+                      <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                      <img src="https://via.placeholder.com/120x120.png?text=Нет+фото" alt="{{ item.product.name }}">
+                    {% endif %}
+                  </div>
+
+                  <div class="cart-product__info">
+                    {% if item.product.slug %}
+                      <a href="{% url 'catalog:product_detail' item.product.slug %}" class="cart-product__name">
+                        {{ item.product.name }}
+                      </a>
+                    {% else %}
+                      <div class="cart-product__name">{{ item.product.name }}</div>
+                    {% endif %}
+
+                    {% if item.product.category %}
+                      <div class="cart-product__meta">{{ item.product.category.name }}</div>
+                    {% endif %}
+                  </div>
                 </div>
-            </td>
-            <td id="total-{{ item.product.id }}">{{ item.total_price }} ₽</td>
-            <td>
-                <a href="{% url 'orders:cart_remove' item.product_id %}" class="cart-remove">
-                    <svg
-  class="icon icon-x"
-  viewBox="0 0 24 24"
-  width="20"
-  height="20"
-  aria-hidden="true"
->
-  <path
-    d="M6 6L18 18M18 6L6 18"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2.4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-</svg>
+              </td>
 
+              <td class="cart-price">{{ item.price }} ₽</td>
+
+              <td>
+                <div class="quantity-controls">
+                  <button type="button" class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, -1)">−</button>
+
+                  <input type="number"
+                         class="quantity-input"
+                         id="qty-{{ item.product.id }}"
+                         value="{{ item.quantity }}"
+                         min="1" max="99" readonly>
+
+                  <button type="button" class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, 1)">+</button>
+                </div>
+              </td>
+
+              <td class="cart-item-total" id="total-{{ item.product.id }}">{{ item.total_price }} ₽</td>
+
+              <td>
+                <a href="{% url 'orders:cart_remove' item.product.id %}" class="cart-remove" aria-label="Удалить товар">
+                  <svg class="icon icon-x" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M6 6L18 18M18 6L6 18"
+                          fill="none" stroke="currentColor" stroke-width="2.4"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-            </td>
-        </tr>
+      <div class="cart-mobile">
+        {% for item in cart %}
+        <div class="cart-mobile-item" id="mobile-item-{{ item.product.id }}">
+          <div class="cart-mobile-top">
+            <div class="cart-mobile-image">
+              {% if item.product.images.first %}
+                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}">
+              {% else %}
+                <img src="https://via.placeholder.com/120x120.png?text=Нет+фото" alt="{{ item.product.name }}">
+              {% endif %}
+            </div>
+
+            <div class="cart-mobile-info">
+              {% if item.product.slug %}
+                <a href="{% url 'catalog:product_detail' item.product.slug %}" class="cart-mobile-name">
+                  {{ item.product.name }}
+                </a>
+              {% else %}
+                <div class="cart-mobile-name">{{ item.product.name }}</div>
+              {% endif %}
+
+              {% if item.product.category %}
+                <div class="cart-mobile-meta">{{ item.product.category.name }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="cart-mobile-row">
+            <div class="cart-mobile-prices">
+              <span>Цена</span>
+              <strong>{{ item.price }} ₽</strong>
+            </div>
+
+            <div class="quantity-controls">
+              <button type="button" class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, -1)">−</button>
+
+              <input type="number"
+                     class="quantity-input"
+                     id="mobile-qty-{{ item.product.id }}"
+                     value="{{ item.quantity }}"
+                     min="1" max="99" readonly>
+
+              <button type="button" class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, 1)">+</button>
+            </div>
+          </div>
+
+          <div class="cart-mobile-actions">
+            <div class="cart-mobile-prices">
+              <span>Итого</span>
+              <strong id="mobile-total-{{ item.product.id }}">{{ item.total_price }} ₽</strong>
+            </div>
+
+            <a href="{% url 'orders:cart_remove' item.product.id %}" class="cart-remove" aria-label="Удалить товар">
+              <svg class="icon icon-x" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path d="M6 6L18 18M18 6L6 18"
+                      fill="none" stroke="currentColor" stroke-width="2.4"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
         {% endfor %}
-    </tbody>
-</table>
-</div>
+      </div>
 
-
-<div class="cart-footer">
-    <div class="cart-footer__promo">
-        <input type="text" id="promoCode" placeholder="Промокод">
-        <button onclick="applyPromoCode()">Применить</button>
-        <div id="promoMessage" class="promo-message"></div>
     </div>
 
-    <div class="cart-footer__total">
+    <div class="cart-footer">
+      <div class="cart-footer__promo">
+        <input type="text" id="promoCode" placeholder="Промокод">
+        <button type="button" onclick="applyPromoCode()">Применить</button>
+        <div id="promoMessage" class="promo-message"></div>
+      </div>
+
+      <div class="cart-footer__total">
         <span>Итого:</span>
         <strong id="cart-total-price">{{ total_price }} ₽</strong>
-    </div>
+      </div>
 
-    <a href="{% url 'orders:order_create' %}" class="cart-footer__checkout">
+      <a href="{% url 'orders:order_create' %}" class="cart-footer__checkout">
         Оформить заказ →
-    </a>
+      </a>
+    </div>
+  {% else %}
+    <div class="cart-empty">
+      <h3>Корзина пока пуста</h3>
+      <p>Добавьте товары из каталога, чтобы оформить заказ.</p>
+      <div class="cart-empty-actions">
+        <a href="{% url 'catalog:product_list' %}" class="cart-empty-link">Перейти в каталог</a>
+      </div>
+    </div>
+  {% endif %}
 </div>
 
-
-
-
-<!--<div class="cart-summary">
-    <span>Общая сумма:</span>
-    <strong id="cart-total-price">{{ total_price }} ₽</strong>
-</div>
-
-
-
-<div class="promo-card">
-    <div class="promo-header">
-        
-        <h5>Промокод</h5>
-    </div>
-
-    <div class="promo-input-wrap">
-        <input 
-            type="text"
-            id="promoCode"
-            class="promo-input"
-            placeholder="Введите промокод"
-        >
-        <button class="promo-btn" onclick="applyPromoCode()">
-            Применить
-        </button>
-    </div>
-
-    <div id="promoMessage" class="promo-message"></div>
-
-    {% if cart.promo_code %}
-    <div class="promo-applied">
-        <span>
-            ✅ Применён промокод 
-            <strong>{{ cart.promo_code.code }}</strong>
-            (-{{ cart.promo_code.discount }}%)
-        </span>
-        <button class="promo-remove" onclick="removePromoCode()">
-            Удалить
-        </button>
-    </div>
-    {% endif %}
-</div>
-
-
-<a href="{% url 'orders:order_create' %}" class="checkout-btn">
-    Оформить заказ →
-</a>
--->
 <script>
 function updateQuantity(productId, change) {
-    console.log('Updating product:', productId, 'change:', change);
-    
     const input = document.getElementById('qty-' + productId);
-    const currentQty = parseInt(input.value);
+    const mobileInput = document.getElementById('mobile-qty-' + productId);
+
+    const currentQty = parseInt((input?.value || mobileInput?.value || '1'), 10);
     let newQty = currentQty + change;
-    
+
     if (newQty < 1) newQty = 1;
-    
+    if (newQty > 99) newQty = 99;
+
     const row = document.getElementById('item-' + productId);
-    row.classList.add('updating');
-    
-    // Используем правильный URL с namespace
+    const mobileRow = document.getElementById('mobile-item-' + productId);
+
+    row?.classList.add('updating');
+    mobileRow?.classList.add('updating');
+
     fetch("{% url 'orders:cart_update' 0 %}".replace('0', productId), {
         method: 'POST',
         headers: {
@@ -539,11 +801,18 @@ function updateQuantity(productId, change) {
     })
     .then(data => {
         if (data.success) {
-            input.value = data.quantity;
-            document.getElementById('total-' + productId).textContent = data.item_total + ' ₽';
-            document.getElementById('cart-total-price').textContent = data.total_price + ' ₽';
+            if (input) input.value = data.quantity;
+            if (mobileInput) mobileInput.value = data.quantity;
+
+            const total = document.getElementById('total-' + productId);
+            const mobileTotal = document.getElementById('mobile-total-' + productId);
+            const cartTotal = document.getElementById('cart-total-price');
+
+            if (total) total.textContent = data.item_total + ' ₽';
+            if (mobileTotal) mobileTotal.textContent = data.item_total + ' ₽';
+            if (cartTotal) cartTotal.textContent = data.total_price + ' ₽';
         } else {
-            console.error('Server error:', data.error);
+            alert(data.error || 'Ошибка при обновлении количества');
         }
     })
     .catch(error => {
@@ -551,20 +820,20 @@ function updateQuantity(productId, change) {
         alert('Ошибка при обновлении количества');
     })
     .finally(() => {
-        row.classList.remove('updating');
+        row?.classList.remove('updating');
+        mobileRow?.classList.remove('updating');
     });
 }
 
-
 function applyPromoCode() {
-    const code = document.getElementById('promoCode').value;
+    const code = document.getElementById('promoCode').value.trim();
     const messageDiv = document.getElementById('promoMessage');
-    
+
     if (!code) {
         messageDiv.innerHTML = '<span class="text-danger">Введите промокод</span>';
         return;
     }
-    
+
     fetch("{% url 'orders:apply_promo' %}", {
         method: 'POST',
         headers: {
@@ -576,28 +845,28 @@ function applyPromoCode() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            
-            // ОБНОВЛЯЕМ СУММУ НА СТРАНИЦЕ
-            document.getElementById('cart-total-price').textContent = data.new_total.toFixed(2) + ' ₽';
-            
-            // Показываем информацию о скидке
-            const discountInfo = `
-                <div class="text-success">
-                     Применена скидка ${data.discount}% 
-                    (Экономия: ${(data.original_total - data.new_total).toFixed(2)} ₽)
-                </div>
+            const originalTotal = parseFloat(data.original_total);
+            const newTotal = parseFloat(data.new_total);
+            const economy = originalTotal - newTotal;
+
+            document.getElementById('cart-total-price').textContent = newTotal.toFixed(2) + ' ₽';
+
+            messageDiv.innerHTML = `
+                <span class="text-success">
+                    Промокод применён! Скидка ${data.discount}%<br>
+                    Экономия: ${economy.toFixed(2)} ₽
+                </span>
             `;
-            messageDiv.innerHTML += discountInfo;
-            
         } else {
             messageDiv.innerHTML = '<span class="text-danger">' + data.message + '</span>';
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Promo error:', error);
         messageDiv.innerHTML = '<span class="text-danger">Ошибка при применении промокода</span>';
     });
 }
+
 function removePromoCode() {
     fetch("{% url 'orders:remove_promo' %}", {
         method: 'POST',
@@ -609,7 +878,8 @@ function removePromoCode() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('cart-total-price').textContent = data.new_total.toFixed(2) + ' ₽';
+            const newTotal = parseFloat(data.new_total);
+            document.getElementById('cart-total-price').textContent = newTotal.toFixed(2) + ' ₽';
             location.reload();
         }
     });

@@ -13,67 +13,109 @@ from django.contrib.auth.models import User
 
 
 def phone_auth_view(request):
-    phone = None
+    phone = ""
+    email = ""
     ask_password = False
+    ask_email = False
     user_exists = False
+    error_message = ""
 
     if request.method == "POST":
-        phone = request.POST.get("phone")
-        password = request.POST.get("password")
+        phone = (request.POST.get("phone") or "").strip()
+        password = (request.POST.get("password") or "").strip()
+        email = (request.POST.get("email") or "").strip()
 
         if not phone:
-            messages.error(request, "Введите номер телефона")
-            return redirect("accounts:login")
+            error_message = "Введите номер телефона"
+            return render(request, "registration/login.html", {
+                "phone": phone,
+                "email": email,
+                "ask_password": False,
+                "ask_email": False,
+                "user_exists": False,
+                "error_message": error_message,
+            })
 
         profile = Profile.objects.select_related("user").filter(phone=phone).first()
 
-        # 🔹 ШАГ 2 — пароль ещё не вводили
         if not password:
-            ask_password = True
             user_exists = bool(profile)
+            ask_password = True
+            ask_email = not user_exists
 
-        else:
-            # 🔹 ПОЛЬЗОВАТЕЛЬ СУЩЕСТВУЕТ → ЛОГИН
-            if profile:
-                user = authenticate(
-                    request,
-                    username=profile.user.username,
-                    password=password
-                )
-                if not user:
-                    messages.error(request, "Неверный пароль")
-                    ask_password = True
-                    user_exists = True
-                else:
-                    login(request, user)
-                    return redirect("home")
+            return render(request, "registration/login.html", {
+                "phone": phone,
+                "email": email,
+                "ask_password": ask_password,
+                "ask_email": ask_email,
+                "user_exists": user_exists,
+                "error_message": error_message,
+            })
 
-            # 🔹 НОВЫЙ ПОЛЬЗОВАТЕЛЬ → РЕГИСТРАЦИЯ
-            else:
-                username = f"user_{phone.replace('+', '').replace(' ', '')}"
-
-                user = User.objects.create_user(
-                    username=username,
-                    password=password
-                )
-
-                Profile.objects.create(
-                    user=user,
-                    phone=phone
-                )
-
+        if profile:
+            user = authenticate(
+                request,
+                username=profile.user.username,
+                password=password
+            )
+            if user:
                 login(request, user)
                 return redirect("home")
 
-    return render(
-        request,
-        "registration/login.html",
-        {
-            "phone": phone,
-            "ask_password": ask_password,
-            "user_exists": user_exists,
-        }
-    )
+            error_message = "Неверный пароль"
+            return render(request, "registration/login.html", {
+                "phone": phone,
+                "email": email,
+                "ask_password": True,
+                "ask_email": False,
+                "user_exists": True,
+                "error_message": error_message,
+            })
+
+        if not email:
+            error_message = "Для регистрации укажите email"
+            return render(request, "registration/login.html", {
+                "phone": phone,
+                "email": email,
+                "ask_password": True,
+                "ask_email": True,
+                "user_exists": False,
+                "error_message": error_message,
+            })
+
+        if User.objects.filter(email=email).exists():
+            error_message = "Пользователь с таким email уже существует"
+            return render(request, "registration/login.html", {
+                "phone": phone,
+                "email": email,
+                "ask_password": True,
+                "ask_email": True,
+                "user_exists": False,
+                "error_message": error_message,
+            })
+
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password
+        )
+
+        Profile.objects.create(
+            user=user,
+            phone=phone
+        )
+
+        login(request, user)
+        return redirect("home")
+
+    return render(request, "registration/login.html", {
+        "phone": phone,
+        "email": email,
+        "ask_password": False,
+        "ask_email": False,
+        "user_exists": False,
+        "error_message": error_message,
+    })
 
 
 #def phone_login_view(request):

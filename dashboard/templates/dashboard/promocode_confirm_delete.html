@@ -1,0 +1,28 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Удалить промокод{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="m-0">Удалить промокод</h3>
+    <div class="muted">Это действие нельзя отменить</div>
+  </div>
+  <a class="btn btn-soft" href="{% url 'dashboard:promocodes_list' %}">← Назад</a>
+</div>
+
+<div class="card p-4" style="max-width:700px;">
+  <p class="mb-2">Вы действительно хотите удалить промокод:</p>
+  <h5 class="mb-3">{{ promocode.code }}</h5>
+
+  <div class="muted mb-4">
+    ID: #{{ promocode.id }}
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'dashboard:promocodes_list' %}" class="btn btn-soft ms-2">Отмена</a>
+  </form>
+</div>
+
+{% endblock %}

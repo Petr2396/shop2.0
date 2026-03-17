@@ -1,0 +1,72 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <h1 style="margin-top:0;">{{ title }}</h1>
+
+  <div class="card" style="max-width:720px;">
+    <form method="post">
+      {% csrf_token %}
+
+      <div style="margin-bottom:12px;">
+        <label>Название</label><br>
+        {{ form.name }}
+        {% for e in form.name.errors %}<div style="color:#dc2626;">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label>Slug</label><br>
+        {{ form.slug }}
+        <div class="muted" style="margin-top:6px;">Можно оставить пустым, если slug генерируется автоматически.</div>
+        {% for e in form.slug.errors %}<div style="color:#dc2626;">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label>Родительская категория</label><br>
+        {{ form.parent }}
+        <div class="muted" style="margin-top:6px;">Если оставить пустым — это будет главная категория. Если выбрать родителя — это будет подкатегория.</div>
+        {% for e in form.parent.errors %}<div style="color:#dc2626;">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label>Описание</label><br>
+        {{ form.description }}
+        {% for e in form.description.errors %}<div style="color:#dc2626;">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label>Иконка</label><br>
+        {{ form.icon }}
+        <div class="muted" style="margin-top:6px;">Например: 🕯️, 🌿, 🎁, ⛪, 🏺</div>
+        {% for e in form.icon.errors %}<div style="color:#dc2626;">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label>Порядок сортировки</label><br>
+        {{ form.order }}
+        <div class="muted" style="margin-top:6px;">Чем меньше число, тем выше категория в списке.</div>
+        {% for e in form.order.errors %}<div style="color:#dc2626;">{{ e }}</div>{% endfor %}
+      </div>
+
+      <button class="btn" type="submit">{{ btn_text }}</button>
+      <a href="{% url 'dashboard:categories_list' %}" style="margin-left:12px;">Отмена</a>
+    </form>
+  </div>
+
+  <style>
+    .input{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid #e5e7eb;
+      border-radius:10px;
+      font:inherit;
+      background:#fff;
+      box-sizing:border-box;
+    }
+
+    textarea.input{
+      resize:vertical;
+      min-height:110px;
+    }
+  </style>
+{% endblock %}

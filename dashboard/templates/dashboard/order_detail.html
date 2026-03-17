@@ -1,0 +1,195 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+{% block content %}
+
+<div class="order-detail-head">
+  <div>
+    <h3>Заказ #{{ order.id }}</h3>
+    <div class="order-detail-sub">Подробная информация по заказу</div>
+  </div>
+  <a class="btn btn-soft" href="{% url 'dashboard:orders_list' %}">← Назад</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card p-3">
+      <div class="info-grid">
+        <div class="info-row">
+          <div class="info-label">Клиент</div>
+          <div class="info-value">{{ order.last_name }} {{ order.first_name }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">Телефон</div>
+          <div class="info-value">{{ order.phone }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">Email</div>
+          <div class="info-value">{{ order.email|default:"—" }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">Адрес</div>
+          <div class="info-value">{{ order.address|default:"—" }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">Создан</div>
+          <div class="info-value">{{ order.created|date:"d.m.Y H:i" }}</div>
+        </div>
+      </div>
+
+      <div class="order-controls">
+        <div class="order-control-row">
+          <div class="info-label">Статус</div>
+
+          <select id="statusSelect" class="form-select status-select">
+            {% for s, label in status_choices %}
+              <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+
+          <button class="btn btn-brand" id="saveStatusBtn" type="button">Сохранить</button>
+        </div>
+
+        <div class="order-control-row">
+          <div class="info-label">Оплата</div>
+
+          <div>
+            <span id="paidBadge" class="pill {% if order.is_paid %}pill-paid{% else %}pill-unpaid{% endif %}">
+              {% if order.is_paid %}Оплачен{% else %}Не оплачен{% endif %}
+            </span>
+          </div>
+
+          <button class="btn btn-soft" id="togglePaidBtn" type="button">Переключить</button>
+        </div>
+
+        <div class="action-msg" id="actionMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card p-0">
+      <div class="table-wrap">
+        <table class="table-order-items">
+          <thead>
+            <tr>
+              <th>Товар</th>
+              <th class="text-end">Цена</th>
+              <th class="text-end">Кол-во</th>
+              <th class="text-end">Сумма</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in order.items.all %}
+              <tr>
+                <td>
+                  <div class="order-item-name">{{ it.product.name }}</div>
+                </td>
+                <td class="text-end">{{ it.price }}</td>
+                <td class="text-end">{{ it.quantity }}</td>
+                <td class="text-end"><b>{{ it.get_cost }}</b></td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center muted py-4">В заказе нет товаров</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card p-3 mt-3">
+      <div class="summary-box">
+        <div class="summary-row">
+          <div class="summary-label">Скидка</div>
+          <div><b>{{ order.discount }}%</b></div>
+        </div>
+
+        <div class="summary-row">
+          <div class="summary-label">Промокод</div>
+          <div><b>{{ order.promo_code|default:"—" }}</b></div>
+        </div>
+
+        <div class="summary-total">
+          <div>Итого к оплате</div>
+          <div>{{ order.get_final_total }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function getCookie(name) {
+    const v = `; ${document.cookie}`;
+    const parts = v.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  const msg = document.getElementById("actionMsg");
+  const statusSelect = document.getElementById("statusSelect");
+  const saveStatusBtn = document.getElementById("saveStatusBtn");
+  const togglePaidBtn = document.getElementById("togglePaidBtn");
+  const paidBadge = document.getElementById("paidBadge");
+
+  function setMsg(text){ if (msg) msg.textContent = text || ""; }
+
+  saveStatusBtn?.addEventListener("click", async () => {
+    setMsg("Сохраняю статус...");
+    try {
+      const res = await fetch("{% url 'dashboard:order_set_status' order.id %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({status: statusSelect.value}).toString()
+      });
+      const data = await res.json();
+      if (data.ok) setMsg("Статус сохранён ✅");
+      else setMsg(data.message || "Ошибка");
+    } catch(e){
+      setMsg("Ошибка сети");
+    }
+  });
+
+  togglePaidBtn?.addEventListener("click", async () => {
+    setMsg("Меняю статус оплаты...");
+    try {
+      const res = await fetch("{% url 'dashboard:order_toggle_paid' order.id %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if (data.is_paid) {
+          paidBadge.classList.remove("pill-unpaid");
+          paidBadge.classList.add("pill-paid");
+          paidBadge.textContent = "Оплачен";
+        } else {
+          paidBadge.classList.remove("pill-paid");
+          paidBadge.classList.add("pill-unpaid");
+          paidBadge.textContent = "Не оплачен";
+        }
+        setMsg("Готово ✅");
+      } else {
+        setMsg(data.message || "Ошибка");
+      }
+    } catch(e){
+      setMsg("Ошибка сети");
+    }
+  });
+})();
+</script>
+
+{% endblock %}

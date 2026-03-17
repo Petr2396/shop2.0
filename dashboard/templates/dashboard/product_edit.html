@@ -1,0 +1,55 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Редактирование товара{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Редактирование товара #{{ product.id }}</h3>
+
+<form method="post" class="card p-3" style="max-width:760px;">
+  {% csrf_token %}
+
+  <div class="mb-2">
+    <label class="form-label">Название</label>
+    <input class="form-control" name="name" value="{{ product.name }}">
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Цена</label>
+    <input class="form-control" name="price" value="{{ product.price }}">
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Категория</label>
+    <select class="form-select" name="category">
+      <option value="">—</option>
+      {% for c in categories %}
+        <option value="{{ c.id }}" {% if product.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  {% if product.stock is not None %}
+  <div class="mb-2">
+    <label class="form-label">Остаток</label>
+    <input class="form-control" name="stock" value="{{ product.stock }}">
+  </div>
+  {% endif %}
+
+  {% if product.is_active is not None %}
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" {% if product.is_active %}checked{% endif %}>
+    <label class="form-check-label" for="is_active">Активен (продаётся)</label>
+  </div>
+  {% endif %}
+
+  <div class="mb-2">
+    <label class="form-label">Описание</label>
+    <textarea class="form-control" name="description" rows="5">{{ product.description }}</textarea>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-light" type="submit">Сохранить</button>
+    <a class="btn btn-outline-light" href="{% url 'dashboard:products_list' %}">Назад</a>
+  </div>
+</form>
+
+{% endblock %}

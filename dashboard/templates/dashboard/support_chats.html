@@ -1,0 +1,89 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Чаты поддержки{% endblock %}
+{% block content %}
+
+<div class="chats-head">
+  <div>
+    <h3>Чаты поддержки</h3>
+    <div class="chats-sub">Поиск по пользователю и фильтр непрочитанных</div>
+  </div>
+</div>
+
+<form class="card p-3 mb-3" method="get">
+  <div class="chats-filters">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Поиск по #id или пользователю">
+
+    <div class="d-flex align-items-center gap-2">
+      <input class="form-check-input m-0" type="checkbox" id="unread" name="unread" value="1"
+             {% if only_unread == "1" %}checked{% endif %}>
+      <label class="form-check-label" for="unread">Только непрочитанные</label>
+    </div>
+
+    <div class="d-grid">
+      <button class="btn btn-brand" type="submit">Найти</button>
+      {% if q or only_unread == "1" %}
+        <a class="btn btn-soft mt-2" href="{% url 'dashboard:support_chats' %}">Сбросить</a>
+      {% endif %}
+    </div>
+  </div>
+</form>
+
+<div class="card p-0">
+  <div class="table-wrap">
+    <table class="table-chats">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Пользователь</th>
+          <th class="text-end">Непрочитано</th>
+          <th class="text-end">Действия</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for c in chats %}
+          <tr>
+            <td class="order-id">#{{ c.id }}</td>
+
+            <td>
+              <div class="chat-user">
+                {% if c.user %}
+                  {% if c.unread_cnt %}<span class="unread-dot"></span>{% endif %}
+                  {{ c.user.username }}
+                {% else %}
+                  {% if c.unread_cnt %}<span class="unread-dot"></span>{% endif %}
+                  Гость
+                {% endif %}
+              </div>
+              <div class="chat-meta">Поддержка</div>
+            </td>
+
+            <td class="text-end">
+              {% if c.unread_cnt %}
+                <span class="unread-pill">{{ c.unread_cnt }}</span>
+              {% else %}
+                <span class="unread-zero">0</span>
+              {% endif %}
+            </td>
+
+            <td class="text-end">
+              <a class="btn btn-soft btn-open" href="{% url 'dashboard:support_chat_detail' c.id %}">
+                Открыть
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="empty-chats">
+              <div style="font-size:42px;">💬</div>
+              <div style="font-weight:800; margin-top:6px; color:var(--text);">Чатов нет</div>
+              <div>Новых обращений пока не поступало</div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

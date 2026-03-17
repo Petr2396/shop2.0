@@ -1,210 +1,681 @@
 {% extends "base.html" %}
-
 {% block title %}Оформление заказа{% endblock %}
+{% block extra_head %}
+<script async src="https://ndd-widget.landpro.site/widget.js"></script>
+{% endblock %}
 
 {% block content %}
-<div class="checkout-wrapper">
-  <h2 class="checkout-title">Оформление заказа</h2>
-
-  <form method="post" class="checkout-form">
-    {% csrf_token %}
-    <div class="form-fields">
-      {{ form.as_p }}
+<div class="checkout-page">
+  <div class="checkout-wrapper">
+    <div class="checkout-head">
+      <h2 class="checkout-title">Оформление заказа</h2>
+      <div class="checkout-subtitle">
+        Заполните данные для доставки и проверьте состав заказа перед подтверждением
+      </div>
     </div>
 
-    <h3 class="cart-title">Товары в заказе</h3>
-    <ul class="cart-items">
-      {% for item in cart %}
-        <li class="cart-item">
-          <span class="product-name">{{ item.product.name }}</span>
-          <span class="product-qty">{{ item.quantity }} × {{ item.price }} ₽</span>
-          <span class="product-total">{{ item.total_price }} ₽</span>
-        </li>
-      {% endfor %}
-    </ul>
+    <form method="post" class="checkout-form" id="checkoutForm">
+      {% csrf_token %}
 
-    <!-- БЛОК С ИТОГАМИ И СКИДКОЙ -->
-    <div class="order-summary">
-      <div class="summary-row">
-        <span>Общая стоимость:</span>
-        <span>{{ cart.get_total_price }} ₽</span>
-      </div>
-      
-      {% if discount %}
-      <div class="summary-row discount">
-        <span>Скидка по промокоду ({{ discount }}%):</span>
-        <span>-{{ cart.get_total_price|floatformat:2|add:"0"|add:total_with_discount|floatformat:2 }} ₽</span>
-      </div>
+      {% if form.errors %}
+        <div class="form-alert form-alert-danger">
+          <b>Проверьте форму:</b>
+          {{ form.errors }}
+        </div>
       {% endif %}
-      
-      <div class="summary-row total">
-        <span><strong>Итого к оплате:</strong></span>
-        <span><strong>{{ total_with_discount }} ₽</strong></span>
-      </div>
 
-      {% if cart.promo_code %}
-      <div class="promo-applied">
-        ✅ Применен промокод: <strong>{{ cart.promo_code.code }}</strong>
-      </div>
-      {% endif %}
-    </div>
+      <div class="checkout-grid">
+        <div class="checkout-main">
+          <div class="form-card">
+            <div class="section-title">Контактные данные</div>
 
-    <button type="submit" class="btn-submit">Подтвердить заказ</button>
-    <p style="font-size:12px; color:#555; margin-top:10px; line-height:1.4; white-space:normal;">
-      Нажимая на кнопку «Подтвердить заказ», вы соглашаетесь с 
-      <a href="#" style="display:inline !important; color:#007bff; text-decoration:none;">Политикой конфиденциальности</a>, 
-      <a href="#" style="display:inline !important; color:#007bff; text-decoration:none;">Пользовательским соглашением (офертой)</a> 
-      и условиями обработки персональных данных.
-    </p>
-  </form>
+            <div class="form-fields">
+              {{ form.as_p }}
+            </div>
+
+            <input type="hidden" name="yandex_pvz_id" id="yandex_pvz_id">
+            <input type="hidden" name="yandex_pvz_address" id="yandex_pvz_address">
+            <input type="hidden" name="yandex_pvz_type" id="yandex_pvz_type">
+            <input type="hidden" name="yandex_pvz_payment_methods" id="yandex_pvz_payment_methods">
+            <input type="hidden" name="yandex_pvz_position" id="yandex_pvz_position">
+
+            <div class="pvz-host" id="yandexWidgetWrap">
+              <div class="pvz-head">
+                <div class="pvz-head-title">Пункт выдачи Яндекса</div>
+                <div class="pvz-head-text">Выберите удобный пункт выдачи на карте</div>
+              </div>
+              <div id="delivery-widget" class="pvz-widget"></div>
+            </div>
+
+            <div id="pvzChosenBox" class="pvz-chosen" style="display:none;">
+              <div class="pvz-label">Выбран пункт выдачи</div>
+              <div id="pvzChosenText" class="pvz-text"></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="checkout-side">
+          <div class="order-card">
+            <div class="section-title">Ваш заказ</div>
+
+            <ul class="cart-items">
+              {% for item in cart %}
+                <li class="cart-item">
+                  <div class="cart-item__main">
+                    <span class="product-name">{{ item.product.name }}</span>
+                    <span class="product-qty">{{ item.quantity }} × {{ item.price }} ₽</span>
+                  </div>
+                  <span class="product-total">{{ item.total_price }} ₽</span>
+                </li>
+              {% endfor %}
+            </ul>
+
+            <div class="order-summary">
+              <div class="summary-row">
+                <span>Товары</span>
+                <span>{{ cart.get_total_price }} ₽</span>
+              </div>
+
+              {% if discount %}
+                <div class="summary-row discount">
+                  <span>Скидка по промокоду ({{ discount }}%)</span>
+                  <span>учтена</span>
+                </div>
+              {% endif %}
+
+              <div class="summary-row total">
+                <span>Итого к оплате</span>
+                <span>{{ total_with_discount }} ₽</span>
+              </div>
+
+              {% if cart.promo_code %}
+                <div class="promo-applied">
+                  ✅ Применён промокод: <strong>{{ cart.promo_code.code }}</strong>
+                </div>
+              {% endif %}
+            </div>
+
+            <button type="submit" class="btn-submit">Подтвердить заказ</button>
+
+            <p class="checkout-note">
+              Нажимая на кнопку «Подтвердить заказ», вы соглашаетесь с
+              <a href="#">Политикой конфиденциальности</a>,
+              <a href="#">Пользовательским соглашением (офертой)</a>
+              и условиями обработки персональных данных.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </form>
+  </div>
 </div>
 
 <style>
-/* Контейнер */
-.checkout-wrapper {
-  max-width: 720px;
-  margin: 30px auto;
-  padding: 26px;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  font-family: "Segoe UI", sans-serif;
+.checkout-page{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --surface-2:#F8F6FC;
+  --surface-3:#F4F1FA;
+  --accent:#7C69A7;
+  --accent-dark:#68558F;
+  --accent-soft:rgba(124,105,167,.10);
+  --text:#262330;
+  --muted:#7C768C;
+  --line:#E8E3F1;
+  --line-strong:#D9D0E8;
+  --success:#3F7D5C;
+  --danger:#C85C5C;
+  --shadow-sm:0 10px 24px rgba(54,42,84,.06);
+  --shadow-md:0 16px 34px rgba(54,42,84,.08);
+  --shadow-lg:0 20px 46px rgba(54,42,84,.10);
 }
 
-/* Заголовки */
-.checkout-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-.cart-title {
-  margin-top: 28px;
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 12px;
+.checkout-page,
+.checkout-page *{
+  box-sizing:border-box;
 }
 
-/* Поля формы */
-.checkout-form p {
-  margin-bottom: 14px;
-  display: flex;
-  flex-direction: column;
-}
-.checkout-form label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #333;
-  font-size: 14px;
-}
-.checkout-form input,
-.checkout-form select,
-.checkout-form textarea {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.checkout-form input:focus,
-.checkout-form select:focus,
-.checkout-form textarea:focus {
-  border-color: #ff7a00;
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.15);
+.checkout-wrapper{
+  max-width:1160px;
+  margin:18px auto 28px;
 }
 
-/* Список товаров */
-.cart-items {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  border-bottom: 1px solid #f1f1f1;
-  font-size: 15px;
-}
-.cart-item:last-child {
-  border-bottom: none;
-}
-.product-name {
-  flex: 1;
-  font-weight: 500;
-}
-.product-qty {
-  margin: 0 12px;
-  color: #666;
-  font-size: 14px;
-}
-.product-total {
-  font-weight: 600;
-  color: #ff5a00;
+.checkout-head{
+  margin-bottom:20px;
 }
 
-/* Блок с итогами */
-.order-summary {
-  margin: 20px 0;
-  padding: 15px;
-  background: #f9f9f9;
-  border-radius: 8px;
-  border: 1px solid #eee;
+.checkout-title{
+  margin:0;
+  font-size:34px;
+  line-height:1.08;
+  font-weight:900;
+  letter-spacing:-.03em;
+  color:var(--text);
 }
 
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  padding: 5px 0;
+.checkout-subtitle{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.65;
 }
 
-.summary-row.discount {
-  color: #28a745;
-  font-weight: 500;
+/* layout */
+.checkout-grid{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) 360px;
+  gap:22px;
+  align-items:start;
 }
 
-.summary-row.total {
-  border-top: 2px solid #ff7a00;
-  padding-top: 10px;
-  margin-top: 10px;
-  font-size: 18px;
+.checkout-main,
+.checkout-side{
+  min-width:0;
 }
 
-.promo-applied {
-  margin-top: 10px;
-  padding: 8px;
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
-  border-radius: 4px;
-  color: #155724;
-  font-size: 14px;
+/* cards */
+.form-card,
+.order-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:28px;
+  box-shadow:var(--shadow-md);
 }
 
-/* Кнопка */
-.btn-submit {
-  margin-top: 20px;
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #ff8c00, #ff5a00);
-  color: #fff;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-.btn-submit:hover {
-  opacity: 0.9;
+.form-card{
+  padding:24px;
 }
 
+.order-card{
+  padding:22px;
+  position:sticky;
+  top:18px;
+}
 
+.section-title{
+  margin:0 0 16px;
+  font-size:22px;
+  line-height:1.15;
+  font-weight:900;
+  letter-spacing:-.02em;
+  color:var(--text);
+}
 
+/* alerts */
+.form-alert{
+  margin-bottom:16px;
+  padding:14px 16px;
+  border-radius:18px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.form-alert-danger{
+  color:#9f3f3f;
+  background:rgba(200,92,92,.10);
+  border:1px solid rgba(200,92,92,.16);
+}
+
+/* django form */
+.checkout-form .form-fields{
+  display:grid;
+  gap:14px;
+}
+
+.checkout-form .form-fields > p{
+  margin:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.checkout-form .form-fields > p > label{
+  margin-bottom:8px;
+  font-size:14px;
+  font-weight:800;
+  color:var(--text);
+}
+
+.checkout-form .form-fields > p > input,
+.checkout-form .form-fields > p > select,
+.checkout-form .form-fields > p > textarea{
+  width:100%;
+  padding:13px 14px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  color:var(--text);
+  font-size:14px;
+  transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.checkout-form .form-fields > p > textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+.checkout-form .form-fields > p > input::placeholder,
+.checkout-form .form-fields > p > textarea::placeholder{
+  color:#9b94ab;
+}
+
+.checkout-form .form-fields > p > input:focus,
+.checkout-form .form-fields > p > select:focus,
+.checkout-form .form-fields > p > textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(124,105,167,.12);
+}
+
+/* errors/help inside django fields */
+.checkout-form .form-fields ul.errorlist{
+  margin:8px 0 0;
+  padding:0;
+  list-style:none;
+  color:#9f3f3f;
+  font-size:13px;
+}
+
+.checkout-form .form-fields .helptext{
+  margin-top:7px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+
+/* pvz */
+.pvz-host{
+  margin-top:18px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:linear-gradient(180deg, #fff 0%, #faf8fd 100%);
+}
+
+.pvz-head{
+  margin-bottom:12px;
+}
+
+.pvz-head-title{
+  font-size:16px;
+  font-weight:900;
+  color:var(--text);
+}
+
+.pvz-head-text{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+}
+
+.pvz-widget{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+  min-height:460px;
+}
+
+.pvz-chosen{
+  margin-top:14px;
+  padding:14px 16px;
+  border:1px solid rgba(124,105,167,.16);
+  border-radius:18px;
+  background:var(--accent-soft);
+}
+
+.pvz-label{
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+}
+
+.pvz-text{
+  margin-top:6px;
+  color:var(--text);
+  font-size:14px;
+  font-weight:800;
+  line-height:1.6;
+}
+
+/* sticky inner widget bars */
+.pvz-host [class*="header"],
+.pvz-host [class*="search"],
+.pvz-host [class*="Address"],
+.pvz-host [class*="address"]{
+  position:sticky !important;
+  top:0 !important;
+  z-index:10 !important;
+  background:#fff !important;
+}
+
+/* order items */
+.cart-items{
+  list-style:none;
+  margin:0;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:20px;
+  overflow:hidden;
+  background:#fff;
+}
+
+.cart-item{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+}
+
+.cart-item:last-child{
+  border-bottom:none;
+}
+
+.cart-item__main{
+  min-width:0;
+  flex:1;
+}
+
+.product-name{
+  display:block;
+  font-size:15px;
+  line-height:1.45;
+  font-weight:800;
+  color:var(--text);
+}
+
+.product-qty{
+  display:block;
+  margin-top:4px;
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+.product-total{
+  font-size:15px;
+  font-weight:900;
+  color:var(--text);
+  white-space:nowrap;
+}
+
+/* summary */
+.order-summary{
+  margin-top:18px;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:linear-gradient(180deg, #ffffff 0%, #f8f5fc 100%);
+}
+
+.summary-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:7px 0;
+  color:var(--text);
+  font-size:14px;
+}
+
+.summary-row.discount{
+  color:var(--success);
+  font-weight:800;
+}
+
+.summary-row.total{
+  margin-top:10px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  font-size:20px;
+  font-weight:900;
+  color:var(--text);
+}
+
+.promo-applied{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:14px;
+  font-size:14px;
+  color:#29533e;
+  background:rgba(63,125,92,.10);
+  border:1px solid rgba(63,125,92,.16);
+}
+
+/* submit */
+.btn-submit{
+  width:100%;
+  margin-top:18px;
+  min-height:52px;
+  padding:0 18px;
+  border:none;
+  border-radius:999px;
+  background:var(--accent);
+  color:#fff;
+  font-size:15px;
+  font-weight:900;
+  cursor:pointer;
+  transition:.18s ease;
+  box-shadow:0 12px 24px rgba(124,105,167,.22);
+}
+
+.btn-submit:hover{
+  background:var(--accent-dark);
+  transform:translateY(-1px);
+}
+
+.checkout-note{
+  margin:14px 2px 0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.7;
+}
+
+.checkout-note a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:700;
+}
+
+.checkout-note a:hover{
+  color:var(--accent-dark);
+  text-decoration:underline;
+}
+
+/* responsive */
+@media (max-width:980px){
+  .checkout-grid{
+    grid-template-columns:1fr;
+  }
+
+  .order-card{
+    position:static;
+    top:auto;
+  }
+}
+
+@media (max-width:640px){
+  .checkout-wrapper{
+    margin:10px auto 22px;
+  }
+
+  .checkout-title{
+    font-size:28px;
+  }
+
+  .checkout-subtitle{
+    font-size:14px;
+  }
+
+  .form-card,
+  .order-card{
+    border-radius:22px;
+    padding:18px;
+  }
+
+  .section-title{
+    font-size:20px;
+  }
+
+  .cart-item{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .product-total{
+    white-space:normal;
+  }
+
+  .summary-row{
+    font-size:14px;
+  }
+
+  .summary-row.total{
+    font-size:18px;
+  }
+
+  .pvz-host{
+    padding:12px;
+    border-radius:18px;
+  }
+
+  .pvz-widget{
+    min-height:420px;
+    border-radius:16px;
+  }
+}
 </style>
-{% endblock %}
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const wrap = document.getElementById("yandexWidgetWrap");
+
+  const pvzId   = document.getElementById("yandex_pvz_id");
+  const pvzAddr = document.getElementById("yandex_pvz_address");
+  const pvzType = document.getElementById("yandex_pvz_type");
+  const pvzPay  = document.getElementById("yandex_pvz_payment_methods");
+  const pvzPos  = document.getElementById("yandex_pvz_position");
+
+  const chosenBox  = document.getElementById("pvzChosenBox");
+  const chosenText = document.getElementById("pvzChosenText");
+
+  let widgetMounted = false;
+
+  function getDelivery() {
+    return document.querySelector(
+      'input[name="delivery_method"]:checked, select[name="delivery_method"]'
+    )?.value || null;
+  }
+
+  function clearPvz() {
+    pvzId.value = "";
+    pvzAddr.value = "";
+    pvzType.value = "";
+    pvzPay.value = "";
+    pvzPos.value = "";
+    if (chosenBox) chosenBox.style.display = "none";
+    if (chosenText) chosenText.textContent = "";
+  }
+
+  function resetWidgetContainer() {
+    const old = document.getElementById("delivery-widget");
+    if (old) {
+      const fresh = document.createElement("div");
+      fresh.id = "delivery-widget";
+      fresh.className = "pvz-widget";
+      old.replaceWith(fresh);
+    }
+    widgetMounted = false;
+  }
+
+  function mountWidget() {
+    if (widgetMounted) return;
+    widgetMounted = true;
+
+    window.YaDelivery.createWidget({
+      containerId: "delivery-widget",
+      params: {
+        city: "Москва",
+        size: { height: "450px", width: "100%" },
+        source_platform_station: "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924",
+        physical_dims_weight_gross: 1000,
+        delivery_term: 1,
+        delivery_price: (price) => price + " ₽",
+        show_select_button: true,
+        filter: {
+          type: ["pickup_point", "terminal"],
+          is_yandex_branded: false,
+          payment_methods: ["already_paid", "card_on_receipt"],
+          payment_methods_filter: "or"
+        }
+      }
+    });
+  }
+
+  function ensureWidget() {
+    if (window.YaDelivery) {
+      mountWidget();
+    } else {
+      document.addEventListener("YaNddWidgetLoad", function () {
+        mountWidget();
+      }, { once: true });
+    }
+  }
+
+  function toggleYandexUI() {
+    const delivery = getDelivery();
+
+    if (delivery === "yandex") {
+      if (wrap) wrap.style.display = "block";
+      resetWidgetContainer();
+      clearPvz();
+      ensureWidget();
+    } else {
+      if (wrap) wrap.style.display = "none";
+      clearPvz();
+      resetWidgetContainer();
+    }
+  }
+
+  document.querySelectorAll('input[name="delivery_method"], select[name="delivery_method"]')
+    .forEach(el => el.addEventListener("change", toggleYandexUI));
+
+  toggleYandexUI();
+
+  document.addEventListener("YaNddWidgetPointSelected", function (e) {
+    const d = e.detail || {};
+
+    const full =
+      d.address?.full_address ||
+      [d.address?.street, d.address?.house].filter(Boolean).join(" ") ||
+      "";
+
+    pvzId.value = d.id || "";
+    pvzType.value = d.type || "";
+    pvzPay.value = JSON.stringify(d.payment_methods || []);
+    pvzPos.value = JSON.stringify(d.position || {});
+    pvzAddr.value = full;
+
+    const addressInput = document.querySelector('input[name="address"], textarea[name="address"]');
+    if (addressInput && full) {
+      addressInput.value = full;
+    }
+
+    if (chosenBox && chosenText && full) {
+      chosenBox.style.display = "block";
+      chosenText.textContent = full;
+    }
+  });
+
+  document.getElementById("checkoutForm")?.addEventListener("submit", function (ev) {
+    if (getDelivery() === "yandex" && !pvzId.value) {
+      ev.preventDefault();
+      alert("Выберите пункт выдачи Яндекса.");
+    }
+  });
+});
+</script>
+
+{% endblock %}

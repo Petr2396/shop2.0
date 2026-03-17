@@ -1,323 +1,511 @@
 {% extends "base.html" %}
-{% block title %}Заявка на возврат - Огонь Жизни{% endblock %}
+{% block title %}Заявка на возврат{% endblock %}
 {% block content %}
-<div class="return-request-container">
-    <div class="return-header">
-        <h2 class="return-title">↶ Заявка на возврат — Заказ #{{ order.id }}</h2>
-        <p class="return-subtitle">Заполните форму для оформления возврата товара</p>
-    </div>
-
-    <form method="post" enctype="multipart/form-data" class="return-form">
-        {% csrf_token %}
-        
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {% for error in form.non_field_errors %}
-                {{ error }}
-            {% endfor %}
+<div class="return-page">
+    <div class="return-request-container">
+        <div class="return-header">
+            <h2 class="return-title">Заявка на возврат — Заказ №{{ order.id }}</h2>
+            <p class="return-subtitle">Заполните форму, чтобы отправить запрос на возврат товара.</p>
         </div>
-        {% endif %}
 
-        <div class="form-section">
-            <div class="form-group">
-                <label class="form-label">{{ form.items.label }}</label>
-                {{ form.items }}
-                {% if form.items.errors %}
-                <div class="error-text">
-                    {% for error in form.items.errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-                {% endif %}
+        <form method="post" enctype="multipart/form-data" class="return-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="form-alert form-alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
             </div>
-        </div>
+            {% endif %}
 
-        <div class="form-section">
-            <div class="form-group">
-                <label class="form-label">{{ form.reason.label }}</label>
-                {{ form.reason }}
-                {% if form.reason.errors %}
-                <div class="error-text">
-                    {% for error in form.reason.errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                <small class="help-text">Подробно опишите причину возврата товара</small>
-            </div>
-        </div>
+            <div class="form-card">
+                <div class="section-title">Данные для заявки</div>
 
-        <div class="form-section">
-            <div class="form-group">
-                <label class="form-label">{{ form.photo.label }}</label>
-                <div class="file-upload-wrapper">
-                    {{ form.photo }}
-                    <div class="file-upload-hint">
-                        <span class="file-icon">📷</span>
-                        <span>Загрузите фото товара (необязательно)</span>
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.items.label }}</label>
+                        {{ form.items }}
+                        {% if form.items.errors %}
+                        <div class="error-text">
+                            {% for error in form.items.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
-                {% if form.photo.errors %}
-                <div class="error-text">
-                    {% for error in form.photo.errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
 
-        <div class="form-section">
-            <div class="form-group">
-                <label class="form-label">{{ form.phone.label }}</label>
-                {{ form.phone }}
-                {% if form.phone.errors %}
-                <div class="error-text">
-                    {% for error in form.phone.errors %}
-                        {{ error }}
-                    {% endfor %}
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.reason.label }}</label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}
+                        <div class="error-text">
+                            {% for error in form.reason.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="help-text">Подробно опишите причину возврата товара.</small>
+                    </div>
                 </div>
-                {% endif %}
-            </div>
-        </div>
 
-        <div class="form-section">
-            <div class="form-group">
-                <label class="form-label">{{ form.email.label }}</label>
-                {{ form.email }}
-                {% if form.phone.errors %}
-                <div class="error-text">
-                    {% for error in form.email.errors %}
-                        {{ error }}
-                    {% endfor %}
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.photo.label }}</label>
+
+                        <div class="file-upload-wrapper">
+                            {{ form.photo }}
+                            
+                            <label for="{{ form.photo.id_for_label }}" class="file-upload-card">
+                                <span class="file-upload-icon">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-1.6A2 2 0 0 1 10.8 4h2.4a2 2 0 0 1 1.6.8L16 6h1.5A2.5 2.5 0 0 1 20 8.5v7A2.5 2.5 0 0 1 17.5 18h-11A2.5 2.5 0 0 1 4 15.5v-7Z"
+                                              fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                        <circle cx="12" cy="12" r="3.2"
+                                                fill="none" stroke="currentColor" stroke-width="1.8"/>
+                                        <path d="M19 5v3M17.5 6.5h3"
+                                              fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+
+                                <span class="file-upload-main">
+                                    <span class="file-upload-title">Добавить фото</span>
+                                    <span class="file-upload-subtitle">Нажмите, чтобы выбрать файл</span>
+                                </span>
+                            </label>
+
+                            <div id="fileNamePreview" class="file-name-preview" style="display:none;"></div>
+
+                            <div class="file-upload-hint">
+                                Вы можете приложить фото товара, если это поможет быстрее рассмотреть заявку.
+                            </div>
+                        </div>
+
+                        {% if form.photo.errors %}
+                        <div class="error-text">
+                            {% for error in form.photo.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
-                {% endif %}
-            </div>
-        </div>
 
-        <div class="form-actions">
-            <button type="submit" class="submit-btn">Отправить заявку</button>
-            <a href="{% url 'orders:my_orders' %}" class="cancel-btn">Отмена</a>
-        </div>
-    </form>
+                <div class="form-grid">
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <div class="error-text">
+                                {% for error in form.phone.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="error-text">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">Отправить заявку</button>
+                    <a href="{% url 'orders:my_orders' %}" class="cancel-btn">Отмена</a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <style>
-.return-request-container {
-    max-width: 700px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+.return-page{
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-2:#F8F6FC;
+    --surface-3:#F4F1FA;
+    --accent:#7C69A7;
+    --accent-dark:#68558F;
+    --accent-soft:rgba(124,105,167,.10);
+    --text:#262330;
+    --muted:#7C768C;
+    --line:#E8E3F1;
+    --line-strong:#D9D0E8;
+    --danger:#C85C5C;
+    --shadow-sm:0 10px 24px rgba(54,42,84,.06);
+    --shadow-md:0 16px 34px rgba(54,42,84,.08);
+    --shadow-lg:0 20px 46px rgba(54,42,84,.10);
 }
 
-.return-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding: 2rem;
-    background: linear-gradient(135deg, #fff6e9 0%, #ffedd1 100%);
-    border-radius: 20px;
-    border: 2px solid #ffe4cc;
+.return-page,
+.return-page *{
+    box-sizing:border-box;
 }
 
-.return-title {
-    color: #ff6a00;
-    font-weight: 800;
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
+.return-request-container{
+    max-width:840px;
+    margin:18px auto 28px;
 }
 
-.return-subtitle {
-    color: #666;
-    font-size: 1.1rem;
-    margin: 0;
+.return-header{
+    margin-bottom:18px;
+    padding:24px 24px;
+    border-radius:28px;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg, #fff 0%, #faf8fd 100%);
+    box-shadow:var(--shadow-md);
 }
 
-.return-form {
-    background: white;
-    padding: 2.5rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(255, 165, 0, 0.1);
-    border: 1px solid #ffe4cc;
+.return-title{
+    margin:0 0 8px;
+    color:var(--text);
+    font-weight:900;
+    font-size:34px;
+    line-height:1.08;
+    letter-spacing:-.03em;
 }
 
-.form-section {
-    margin-bottom: 2rem;
+.return-subtitle{
+    margin:0;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.65;
 }
 
-.form-group {
-    margin-bottom: 1.5rem;
+.return-form{
+    margin:0;
 }
 
-.form-label {
-    display: block;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 0.8rem;
-    font-size: 1rem;
+.form-card{
+    padding:24px;
+    border-radius:28px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    box-shadow:var(--shadow-md);
 }
 
-/* Стилизация полей формы */
+.section-title{
+    margin:0 0 18px;
+    font-size:22px;
+    line-height:1.15;
+    font-weight:900;
+    letter-spacing:-.02em;
+    color:var(--text);
+}
+
+.form-section{
+    margin-bottom:18px;
+}
+
+.form-group{
+    margin:0;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.form-label{
+    display:block;
+    margin-bottom:8px;
+    font-size:14px;
+    font-weight:800;
+    color:var(--text);
+}
+
+/* поля формы */
 .return-form select,
 .return-form textarea,
 .return-form input[type="text"],
 .return-form input[type="email"],
 .return-form input[type="tel"],
-.return-form input[type="file"] {
-    width: 100%;
-    padding: 1rem;
-    border: 2px solid #ffe4cc;
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: #fffaf0;
-    box-sizing: border-box;
-    font-family: inherit;
+.return-form input[type="file"]{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    font-size:14px;
+    line-height:1.45;
+    transition:.18s ease;
+    background:#fff;
+    font-family:inherit;
+    color:var(--text);
+    box-sizing:border-box;
 }
 
 .return-form select:focus,
 .return-form textarea:focus,
 .return-form input[type="text"]:focus,
 .return-form input[type="email"]:focus,
-.return-form input[type="tel"]:focus {
-    outline: none;
-    border-color: #ff6a00;
-    box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.1);
-    background: white;
+.return-form input[type="tel"]:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(124,105,167,.12);
+    background:#fff;
 }
 
-.return-form textarea {
-    min-height: 120px;
-    resize: vertical;
+.return-form textarea{
+    min-height:130px;
+    resize:vertical;
+    line-height:1.65;
 }
 
-.return-form select {
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23ff6a00' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 12px;
+.return-form input::placeholder,
+.return-form textarea::placeholder{
+    color:#9b94ab;
 }
 
-/* Стили для загрузки файлов */
-.file-upload-wrapper {
-    position: relative;
+.return-form select{
+    appearance:none;
+    background-image:url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%237C69A7' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 1rem center;
+    background-size:12px;
 }
 
-.file-upload-wrapper input[type="file"] {
-    padding: 1rem;
-    border: 2px dashed #ffe4cc;
-    background: #fffaf0;
-    cursor: pointer;
+/* file upload */
+.file-upload-wrapper{
+    position:relative;
 }
 
-.file-upload-wrapper input[type="file"]:hover {
-    border-color: #ff6a00;
-    background: #fff0e0;
+.file-upload-wrapper input[type="file"]{
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+    width:1px;
+    height:1px;
 }
 
-.file-upload-hint {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #666;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
+.file-upload-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    width:100%;
+    padding:16px 18px;
+    border:1px dashed #cdbfe4;
+    border-radius:20px;
+    background:rgba(124,105,167,.05);
+    cursor:pointer;
+    transition:.18s ease;
 }
 
-.file-icon {
-    font-size: 1.2rem;
+.file-upload-card:hover{
+    border-color:var(--accent);
+    background:rgba(124,105,167,.09);
+    transform:translateY(-1px);
 }
 
-/* Ошибки и подсказки */
-.alert {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    border: 1px solid transparent;
+.file-upload-icon{
+    width:54px;
+    height:54px;
+    min-width:54px;
+    border-radius:16px;
+    background:#fff;
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--accent);
+    box-shadow:var(--shadow-sm);
 }
 
-.alert-danger {
-    background: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
+.file-upload-icon svg{
+    width:24px;
+    height:24px;
+    display:block;
 }
 
-.error-text {
-    color: #dc3545;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
+.file-upload-main{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:0;
 }
 
-.help-text {
-    color: #666;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    display: block;
+.file-upload-title{
+    font-size:15px;
+    font-weight:800;
+    color:var(--text);
 }
 
-/* Кнопки */
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 2.5rem;
-    flex-wrap: wrap;
+.file-upload-subtitle{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.45;
 }
 
-.submit-btn {
-    background: linear-gradient(135deg, #ff6a00 0%, #ff8c00 100%);
-    color: white;
-    padding: 1rem 2.5rem;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(255, 106, 0, 0.3);
+.file-name-preview{
+    margin-top:10px;
+    padding:11px 12px;
+    border-radius:14px;
+    background:#fff;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:14px;
+    line-height:1.45;
 }
 
-.submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 106, 0, 0.4);
+.file-upload-hint{
+    margin-top:10px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.6;
 }
 
-.cancel-btn {
-    background: white;
-    color: #666;
-    padding: 1rem 2rem;
-    border: 2px solid #ddd;
-    border-radius: 12px;
-    text-decoration: none;
-    font-size: 1.1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
+/* alerts/errors */
+.form-alert{
+    padding:14px 16px;
+    border-radius:18px;
+    margin-bottom:16px;
+    border:1px solid transparent;
+    font-size:14px;
+    line-height:1.6;
 }
 
-.cancel-btn:hover {
-    border-color: #ff6a00;
-    color: #ff6a00;
-    text-decoration: none;
+.form-alert-danger{
+    background:rgba(200,92,92,.10);
+    color:#9f3f3f;
+    border-color:rgba(200,92,92,.16);
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-    .return-title {
-        font-size: 1.8rem;
+.error-text{
+    color:#9f3f3f;
+    font-size:13px;
+    margin-top:8px;
+    line-height:1.55;
+}
+
+.help-text{
+    display:block;
+    margin-top:8px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.55;
+}
+
+/* buttons */
+.form-actions{
+    display:flex;
+    gap:12px;
+    justify-content:flex-start;
+    margin-top:24px;
+    flex-wrap:wrap;
+}
+
+.submit-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:50px;
+    padding:0 24px;
+    border:none;
+    border-radius:999px;
+    font-size:15px;
+    font-weight:900;
+    background:var(--accent);
+    color:#fff;
+    cursor:pointer;
+    transition:.18s ease;
+    box-shadow:0 12px 24px rgba(124,105,167,.22);
+}
+
+.submit-btn:hover{
+    background:var(--accent-dark);
+    transform:translateY(-1px);
+}
+
+.cancel-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:50px;
+    padding:0 22px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:#fff;
+    color:var(--text);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:800;
+    transition:.18s ease;
+}
+
+.cancel-btn:hover{
+    border-color:rgba(124,105,167,.22);
+    color:var(--accent);
+    background:var(--surface-2);
+    text-decoration:none;
+}
+
+/* adaptive */
+@media (max-width:768px){
+    .return-title{
+        font-size:28px;
     }
-    
-    .return-form {
-        padding: 1.5rem;
+
+    .return-subtitle{
+        font-size:14px;
     }
-    
-    .form-actions {
-        flex-direction: column;
+
+    .return-header,
+    .form-card{
+        padding:18px;
+        border-radius:22px;
     }
-    
+
+    .section-title{
+        font-size:20px;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+        gap:0;
+    }
+
+    .form-actions{
+        flex-direction:column;
+    }
+
     .submit-btn,
-    .cancel-btn {
-        width: 100%;
-        text-align: center;
+    .cancel-btn{
+        width:100%;
+        text-align:center;
     }
 }
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+    const fileInput = document.getElementById("{{ form.photo.id_for_label }}");
+    const preview = document.getElementById("fileNamePreview");
+
+    if (fileInput && preview) {
+        fileInput.addEventListener("change", function(){
+            if (this.files && this.files.length > 0) {
+                preview.style.display = "block";
+                preview.textContent = "Выбран файл: " + this.files[0].name;
+            } else {
+                preview.style.display = "none";
+                preview.textContent = "";
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

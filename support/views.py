@@ -1,224 +1,261 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from .models import SupportChat, SupportMessage
 from django.views.decorators.http import require_GET
-from django.contrib.admin.views.decorators import staff_member_required
+from django.utils import timezone
+
+from django.contrib.admin.sites import site as admin_site
+from django.template.response import TemplateResponse
+
+
+from .models import SupportChat, SupportMessage
+
 import json
 import time
+
+
+# ---------- helpers ----------
+
+def _serialize_message(msg: SupportMessage):
+    local_dt = timezone.localtime(msg.created) if msg.created else None
+
+    return {
+        "id": msg.id,
+        "text": msg.text or "",
+        "is_from_admin": bool(msg.is_from_admin),
+        "created": msg.created.isoformat() if msg.created else None,
+        "time": local_dt.strftime("%H:%M") if local_dt else "",
+        "attachment": msg.attachment.url if getattr(msg, "attachment", None) else None,
+        "attachment_name": getattr(msg, "attachment_name", "") or "",
+        "attachment_mime": getattr(msg, "attachment_mime", "") or "",
+    }
+
+
+def _is_ajax(request):
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+
+# =========== КЛИЕНТ: чат ===========
 
 @login_required
 def support_chat_view(request):
     chat, _ = SupportChat.objects.get_or_create(user=request.user)
-    
+
     if request.method == "POST":
         text = request.POST.get("text", "").strip()
-        if text:
-            message = SupportMessage.objects.create(
-                chat=chat,
-                text=text,
-                is_from_admin=False
+        file = request.FILES.get("file")
+
+        if not text and not file:
+            return JsonResponse(
+                {"status": "error", "message": "empty"},
+                status=400
             )
-        
-        # Если это AJAX запрос - возвращаем JSON
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+
+        message = SupportMessage.objects.create(
+            chat=chat,
+            text=text,
+            is_from_admin=False,
+            attachment=file if file else None
+        )
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({
-                'status': 'ok',
-                'message_id': message.id if text else None
+                "status": "ok",
+                "message": {
+                    "id": message.id,
+                    "text": message.text,
+                    "is_from_admin": message.is_from_admin,
+                    "time": timezone.localtime(message.created).strftime("%H:%M"),
+
+                    "attachment": message.attachment.url if message.attachment else None,
+                    "attachment_name": message.attachment.name.split("/")[-1] if message.attachment else None,
+                    "attachment_mime": message.attachment.file.content_type if message.attachment else None,
+                }
             })
-        
-        # Если обычный POST - редирект (для совместимости)
-        return redirect('support_chat')
-    
+
+        return redirect("support_chat")
+
     messages = chat.messages.order_by("created")
     return render(request, "support/chat.html", {
         "messages": messages,
         "chat": chat
     })
 
-# support/views.py
+
+# =========== API: новые сообщения (клиент) ===========
 @login_required
 @require_GET
 def get_new_messages(request):
-    """API для получения новых сообщений"""
     chat, _ = SupportChat.objects.get_or_create(user=request.user)
-    
-    # Получаем ID последнего сообщения
-    last_id = request.GET.get('last_id', 0)
+
+    last_id = request.GET.get("last_id", 0)
     try:
         last_id = int(last_id)
-    except:
+    except Exception:
         last_id = 0
-    
-    # Получаем новые сообщения (созданные ПОСЛЕ last_id)
-    new_messages = chat.messages.filter(id__gt=last_id).order_by('created')
-    
-    messages_data = []
-    for msg in new_messages:
-        messages_data.append({
-            'id': msg.id,
-            'text': msg.text,
-            'is_from_admin': msg.is_from_admin,
-            'created': msg.created.isoformat() if msg.created else None,
-            'time': msg.created.strftime('%H:%M') if msg.created else ''
-        })
-    
-    # Определяем новый last_id
-    new_last_id = last_id
-    if new_messages.exists():
-        new_last_id = new_messages.last().id
-    
+
+    new_messages = chat.messages.filter(id__gt=last_id).order_by("created")
+
+    data = [_serialize_message(m) for m in new_messages]
+    new_last_id = new_messages.last().id if new_messages.exists() else last_id
+
     return JsonResponse({
-        'status': 'ok',
-        'messages': messages_data,
-        'last_id': new_last_id,
-        'has_new': len(messages_data) > 0
+        "status": "ok",
+        "messages": data,
+        "last_id": new_last_id,
+        "has_new": bool(data),
     })
-# =========== АДМИНСКИЕ ФУНКЦИИ ===========
+
+
+# =========== АДМИН: список чатов ===========
 
 @staff_member_required
 def admin_chat_list(request):
-    """Список всех чатов для админа (простая версия)"""
-    chats = SupportChat.objects.all().order_by('-created')
-    
-    # Добавляем информацию о каждом чате
+    chats = SupportChat.objects.all().order_by("-created")
+
     for chat in chats:
-        # Последнее сообщение
-        last_message = chat.messages.order_by('-created').first()
-        chat.last_message = last_message.text[:50] + '...' if last_message else 'Нет сообщений'
+        last_message = chat.messages.order_by("-created").first()
+        chat.last_message = (last_message.text[:50] + "...") if last_message and last_message.text else "Нет сообщений"
         chat.last_message_time = last_message.created if last_message else None
-        
-        # Количество непрочитанных (от клиента)
         chat.unread_count = chat.messages.filter(is_from_admin=False).count()
-        # Общее количество сообщений
         chat.total_count = chat.messages.count()
-    
-    return render(request, 'support/admin_chat_list.html', {
-        'chats': chats
-    })
+
+    return render(request, "support/admin_chat_list.html", {"chats": chats})
+
+
+# =========== АДМИН: чат ===========
 
 @staff_member_required
 def admin_chat_detail(request, chat_id):
-    """Админский чат"""
     chat = get_object_or_404(SupportChat, id=chat_id)
-    
+
+    # ===== POST: отправка сообщения =====
     if request.method == "POST":
-        text = request.POST.get("text", "").strip()
-        if text:
-            message = SupportMessage.objects.create(
-                chat=chat,
-                text=text,
-                is_from_admin=True
-            )
-        
-        # Если AJAX
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'status': 'ok',
-                'message_id': message.id if text else None
-            })
-        
-        return redirect('admin_chat_detail', chat_id=chat_id)
-    
-    messages = chat.messages.order_by("created")
-    return render(request, 'support/admin_chat_detail.html', {
-        'chat': chat,
-        'messages': messages
-    })
+        text = (request.POST.get("text") or "").strip()
+        file = request.FILES.get("file")
+
+        if not text and not file:
+            if _is_ajax(request):
+                return JsonResponse({"status": "error", "message": "Пустое сообщение"}, status=400)
+            return redirect("admin_chat_detail", chat_id=chat_id)
+
+        msg = SupportMessage.objects.create(
+            chat=chat,
+            text=text,
+            is_from_admin=True,
+            created=timezone.now(),
+        )
+
+        if file:
+            msg.attachment = file
+            msg.attachment_name = file.name or ""
+            msg.attachment_mime = getattr(file, "content_type", "") or ""
+            msg.save(update_fields=["attachment", "attachment_name", "attachment_mime"])
+
+        if _is_ajax(request):
+            return JsonResponse({"status": "ok", "message": _serialize_message(msg)})
+
+        return redirect("admin_chat_detail", chat_id=chat_id)
+
+    # ===== GET: показ сообщений =====
+    messages_qs = chat.messages.order_by("created")
+
+    context = {
+        **admin_site.each_context(request),   # ✅ меню/юзер/хедер и т.д. для Jazzmin/Django admin
+        "chat": chat,
+        "messages": messages_qs,
+        "title": f"Чат #{chat.id}",
+    }
+
+    # ✅ ВАЖНО: этот шаблон должен наследоваться от admin/base_site.html
+    return TemplateResponse(request, "support/admin_chat_detail.html", context)
+
+# =========== АДМИН: API отправки (AJAX) ===========
 
 @staff_member_required
 def admin_send_message(request, chat_id):
-    """API для отправки сообщения от админа (AJAX)"""
-    if request.method == "POST":
-        chat = get_object_or_404(SupportChat, id=chat_id)
-        
-        # Получаем текст из разных форматов запросов
-        if request.content_type == 'application/json':
-            try:
-                data = json.loads(request.body)
-                text = data.get('text', '').strip()
-            except:
-                text = ''
-        else:
-            text = request.POST.get('text', '').strip()
-        
-        if text:
-            message = SupportMessage.objects.create(
-                chat=chat,
-                text=text,
-                is_from_admin=True
-            )
-            
-            return JsonResponse({
-                'status': 'ok',
-                'message_id': message.id,
-                'text': text,
-                'created': message.created.isoformat() if message.created else None
-            })
-    
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
+    chat = get_object_or_404(SupportChat, id=chat_id)
+
+    # поддержка json/form + file
+    text = ""
+    if request.content_type == "application/json":
+        try:
+            payload = json.loads(request.body.decode("utf-8"))
+            text = (payload.get("text") or "").strip()
+        except Exception:
+            text = ""
+        file = None
+    else:
+        text = (request.POST.get("text") or "").strip()
+        file = request.FILES.get("file")
+
+    if not text and not file:
+        return JsonResponse({"status": "error", "message": "Пустое сообщение"}, status=400)
+
+    msg = SupportMessage.objects.create(
+        chat=chat,
+        text=text,
+        is_from_admin=True,
+        created=timezone.now(),
+    )
+
+    if file:
+        msg.attachment = file
+        msg.attachment_name = file.name or ""
+        msg.attachment_mime = getattr(file, "content_type", "") or ""
+        msg.save(update_fields=["attachment", "attachment_name", "attachment_mime"])
+
+    return JsonResponse({"status": "ok", "message": _serialize_message(msg)})
+
+
+# =========== УНИВЕРСАЛЬНЫЙ LONG-POLL API (клиент/админ) ===========
 
 @require_GET
 def get_chat_messages_api(request, chat_id=None):
-    """Универсальный API для получения новых сообщений"""
-    
-    # Определяем, чей это чат
+    # кто запрашивает
     if chat_id:
-        # Админ запрашивает конкретный чат
+        # админ
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return JsonResponse({"status": "error", "message": "Forbidden"}, status=403)
         chat = get_object_or_404(SupportChat, id=chat_id)
     else:
-        # Клиент запрашивает свой чат
+        # клиент
         if not request.user.is_authenticated:
-            return JsonResponse({'status': 'error', 'message': 'Not authenticated'}, status=401)
+            return JsonResponse({"status": "error", "message": "Not authenticated"}, status=401)
         chat, _ = SupportChat.objects.get_or_create(user=request.user)
-    
-    last_id = request.GET.get('last_id', 0)
+
+    last_id = request.GET.get("last_id", 0)
     try:
         last_id = int(last_id)
-    except:
+    except Exception:
         last_id = 0
-    
-    # Long polling: ждем новые сообщения
-    if request.GET.get('wait') == 'true':
-        timeout = 30  # максимум 30 секунд
-        check_interval = 1  # проверять каждую секунду
+
+    # long polling
+    if request.GET.get("wait") == "true":
+        timeout = 30
+        check_interval = 1
         start_time = time.time()
-        
+
         while time.time() - start_time < timeout:
-            # Проверяем новые сообщения
-            new_messages = chat.messages.filter(id__gt=last_id).order_by('created')
-            if new_messages.exists():
+            if chat.messages.filter(id__gt=last_id).exists():
                 break
             time.sleep(check_interval)
-    
-    # Получаем ВСЕ новые сообщения
-    new_messages = chat.messages.filter(id__gt=last_id).order_by('created')
-    
-    messages_data = []
-    for msg in new_messages:
-        messages_data.append({
-            'id': msg.id,
-            'text': msg.text,
-            'is_from_admin': msg.is_from_admin,
-            'created': msg.created.isoformat() if msg.created else None,
-            'time': msg.created.strftime('%H:%M') if msg.created else ''
-        })
-    
-    new_last_id = last_id
-    if new_messages.exists():
-        new_last_id = new_messages.last().id
-    
+
+    new_messages = chat.messages.filter(id__gt=last_id).order_by("created")
+    data = [_serialize_message(m) for m in new_messages]
+    new_last_id = new_messages.last().id if new_messages.exists() else last_id
+
     return JsonResponse({
-        'status': 'ok',
-        'messages': messages_data,
-        'last_id': new_last_id,
-        'chat_id': chat.id,
-        'user': chat.user.username if chat.user else 'Аноним'
+        "status": "ok",
+        "messages": data,
+        "last_id": new_last_id,
+        "chat_id": chat.id,
+        "user": chat.user.username if chat.user else "Аноним",
     })
-
-
-    
 
 
 

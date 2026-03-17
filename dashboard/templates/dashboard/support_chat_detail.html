@@ -1,0 +1,159 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Чат #{{ chat.id }}{% endblock %}
+{% block content %}
+
+<div class="chat-head">
+  <div>
+    <h3>Чат #{{ chat.id }}</h3>
+    <div class="chat-sub">
+      {% if chat.user %}Пользователь: <b>{{ chat.user.username }}</b>{% else %}Гость{% endif %}
+    </div>
+  </div>
+
+  <a class="btn btn-soft" href="{% url 'dashboard:support_chats' %}">← Назад</a>
+</div>
+
+<div class="card chat-card p-0">
+  <div id="chatBox" class="chat-box">
+    {% for m in messages %}
+      <div class="chat-row {% if m.is_from_admin %}admin{% else %}user{% endif %}">
+        <div class="bubble {% if m.is_from_admin %}admin{% endif %}">
+          {% if m.text %}
+            <div class="text">{{ m.text }}</div>
+          {% endif %}
+
+          {% if m.attachment %}
+            <a class="file-link" href="{{ m.attachment.url }}" target="_blank">
+              📎 {{ m.attachment_name|default:"Файл" }}
+            </a>
+          {% endif %}
+
+          <div class="meta">{{ m.created|date:"d.m.Y H:i" }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="composer">
+    <form id="sendForm">
+      {% csrf_token %}
+      <div class="composer-grid">
+        <input class="form-control" id="msgText" name="text" placeholder="Напишите сообщение...">
+        <input class="form-control" type="file" id="msgFile" name="file">
+        <button class="btn btn-brand" type="submit" id="sendBtn">Отправить</button>
+      </div>
+      <div class="status-line" id="statusLine"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  const chatBox = document.getElementById("chatBox");
+  const form = document.getElementById("sendForm");
+  const text = document.getElementById("msgText");
+  const file = document.getElementById("msgFile");
+  const btn = document.getElementById("sendBtn");
+  const statusLine = document.getElementById("statusLine");
+
+  let lastId = Number("{{ last_id|default:0 }}") || 0;
+
+  function setStatus(t){ if(statusLine) statusLine.textContent = t || ""; }
+
+  function scrollToBottom(){
+    if (!chatBox) return;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function bubble(m){
+    const row = document.createElement("div");
+    row.className = "chat-row " + (m.is_from_admin ? "admin" : "user");
+
+    const b = document.createElement("div");
+    b.className = "bubble" + (m.is_from_admin ? " admin" : "");
+
+    if (m.text){
+      const t = document.createElement("div");
+      t.className = "text";
+      t.textContent = m.text;
+      b.appendChild(t);
+    }
+
+    if (m.has_file && m.file_url){
+      const a = document.createElement("a");
+      a.className = "file-link";
+      a.target = "_blank";
+      a.href = m.file_url;
+      a.textContent = "📎 " + (m.file_name || "Файл");
+      b.appendChild(a);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = m.created;
+    b.appendChild(meta);
+
+    row.appendChild(b);
+    return row;
+  }
+
+  async function poll(){
+    try{
+      const res = await fetch("{% url 'dashboard:support_messages' chat.id %}?after_id=" + lastId, {
+        headers: {"X-Requested-With":"XMLHttpRequest"}
+      });
+      const data = await res.json();
+      if (!data.ok) return;
+
+      if (Array.isArray(data.messages) && data.messages.length){
+        const atBottom = (chatBox.scrollTop + chatBox.clientHeight) >= (chatBox.scrollHeight - 30);
+
+        data.messages.forEach(m => {
+          chatBox.appendChild(bubble(m));
+          lastId = Math.max(lastId, m.id);
+        });
+
+        if (atBottom) scrollToBottom();
+      }
+    }catch(e){}
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setStatus("Отправляю...");
+    btn.disabled = true;
+
+    const fd = new FormData(form);
+
+    try{
+      const res = await fetch("{% url 'dashboard:support_send_message' chat.id %}", {
+        method: "POST",
+        headers: {"X-Requested-With":"XMLHttpRequest"},
+        body: fd
+      });
+      const data = await res.json();
+      if (data.ok){
+        const m = data.message;
+        chatBox.appendChild(bubble(m));
+        lastId = Math.max(lastId, m.id);
+        text.value = "";
+        file.value = "";
+        scrollToBottom();
+        setStatus("Отправлено ✅");
+      } else {
+        setStatus(data.message || "Ошибка отправки");
+      }
+    }catch(e){
+      setStatus("Ошибка сети");
+    }finally{
+      btn.disabled = false;
+      setTimeout(()=>setStatus(""), 1200);
+    }
+  });
+
+  scrollToBottom();
+  setInterval(poll, 2000);
+})();
+</script>
+
+{% endblock %}

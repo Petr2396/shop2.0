@@ -1,0 +1,119 @@
+:root{
+  --bg:#ffffff;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+
+  --brand:#ff7a00;         /* оранжевый */
+  --brand-dark:#e66d00;
+  --brand-soft:rgba(255,122,0,.10);
+  --shadow:0 12px 30px rgba(17,24,39,.08);
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+.dash-wrap{
+  max-width:1200px;
+  margin:0 auto;
+  padding:20px 16px 40px;
+}
+
+.dash-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+.dash-title{
+  font-size:22px;
+  font-weight:700;
+  margin:0;
+}
+.dash-sub{
+  color:var(--muted);
+  margin-top:2px;
+  font-size:13px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  cursor:pointer;
+  text-decoration:none;
+  font-weight:600;
+  transition:.15s;
+}
+.btn:hover{ transform:translateY(-1px); }
+.btn-primary{
+  background:var(--brand);
+  border-color:var(--brand);
+  color:#fff;
+}
+.btn-primary:hover{ background:var(--brand-dark); border-color:var(--brand-dark); }
+
+.input, .select, .textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 12px;
+  outline:none;
+  background:#fff;
+}
+.textarea{ min-height:140px; resize:vertical; }
+.help{ font-size:12px; color:var(--muted); margin-top:6px; }
+
+.table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+}
+.table th, .table td{
+  text-align:left;
+  padding:12px 12px;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+.table th{ font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+.table tr:hover td{ background:rgba(17,24,39,.02); }
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:var(--brand-soft);
+  color:var(--brand);
+  border:1px solid rgba(255,122,0,.25);
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+@media(max-width:900px){
+  .grid2{ grid-template-columns:1fr; }
+}

@@ -1,321 +1,495 @@
 {% extends "base.html" %}
-{% block title %}Огонь Жизни — товары для уюта{% endblock %}
+{% block title %}Огонь Жизни — товары для дома и подарков{% endblock %}
 
 {% block content %}
 <style>
-/* ========= СКОУП: чтобы не ломать остальной сайт ========= */
-.mp-home { --brand:#ff6a00; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --card:#fff; }
-.mp-home, .mp-home * { font-weight: 400; }
-
-
-.mp-home .wrap { max-width: 1200px; margin: 0 auto; padding: 18px 14px 48px; }
-
-/* HERO */
-.mp-home .hero {
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 10px 30px rgba(0,0,0,.06);
-  overflow: hidden;
+/* ===== HOME PAGE (scoped) ===== */
+.hp{
+  --bg:#F5F7FB;
+  --surface:#FFFFFF;
+  --surface-2:#F8FAFC;
+  --accent:#7C69A7;
+  --accent-dark:#68558F;
+  --accent-soft:rgba(124,105,167,.12);
+  --text:#2B2F3A;
+  --muted:#7B8394;
+  --line:#E7EBF3;
+  --shadow:0 14px 34px rgba(32,43,67,.08);
 }
-.mp-home .hero-inner{
-  display:grid;
-  grid-template-columns: 1.2fr .8fr;
-  gap: 18px;
-  padding: 22px;
-  align-items:center;
+.hp, .hp *{ box-sizing:border-box; }
+.hp{
+  background: transparent;
+  color:var(--text);
 }
-.mp-home .hero h1{
-  margin:0;
-  font-weight: 600;          /* было 900 */
-  letter-spacing: -.3px;
-  font-size: 34px;
-  color: var(--text);
-  line-height: 1.12;
-}
-.mp-home .hero h1 .accent{ color: var(--brand); font-weight: 600; }
-.mp-home .hero p{
-  margin: 10px 0 14px;
-  color: var(--muted);
-  font-size: 15px;
-  max-width: 560px;
+.hp .wrap{
+  max-width:1200px;
+  margin:0 auto;
+  padding:20px 14px 68px;
 }
 
-/* Search */
-.mp-home .search {
+/* ===== HERO ===== */
+.hp .hero{
+  border:1px solid var(--line);
+  border-radius:28px;
+  overflow:hidden;
+  background:
+    radial-gradient(800px 300px at 10% 0%, rgba(124,105,167,.10), transparent 60%),
+    radial-gradient(700px 280px at 100% 10%, rgba(124,105,167,.08), transparent 58%),
+    linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%);
+  box-shadow: var(--shadow);
+}
+.hp .hero-in{
+  padding:64px 28px;
   display:flex;
-  gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 8px;
-  background: #fff;
-  max-width: 720px;
+  justify-content:center;
 }
-.mp-home .search input{
-  border: 0;
-  outline: 0;
-  flex: 1;
-  padding: 8px 10px;
-  font-size: 14px;
-  min-width: 0;
+.hp .hero-box{
+  width:100%;
+  max-width:900px;
+  text-align:center;
 }
-.mp-home .search button{
-  border: 0;
-  background: var(--brand);
-  color: #fff;
-  border-radius: 999px;
-  padding: 9px 12px;
-  font-weight: 500;          /* было 800 */
-  cursor: pointer;
-  transition:.15s;
-}
-.mp-home .search button:hover{ filter: brightness(.96); transform: translateY(-1px); }
-
-/* Actions */
-.mp-home .hero-actions{ margin-top: 10px; display:flex; gap:10px; flex-wrap:wrap; }
-.mp-home .hero-actions a{
-  text-decoration:none;
-  font-weight: 500;          /* было 800 */
-  border-radius: 999px;
-  padding: 9px 12px;
+.hp .eyebrow{
   display:inline-flex;
   align-items:center;
   gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.92);
+  color:var(--accent);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
 }
-.mp-home .btn-solid{
-  background: var(--brand);
-  color:#fff;
-  box-shadow: 0 10px 20px rgba(255,106,0,.18);
+.hp .h-title{
+  margin:18px 0 0;
+  font-size:clamp(34px, 5vw, 52px);
+  line-height:1.08;
+  letter-spacing:-.03em;
+  font-weight:700;
+  color:var(--text);
 }
-.mp-home .btn-solid:hover{ filter: brightness(.97); transform: translateY(-1px); }
-.mp-home .btn-soft{
-  background:#fff;
-  color: var(--text);
-  border: 1px solid var(--line);
+.hp .h-title .a{
+  color:var(--accent);
 }
-.mp-home .btn-soft:hover{ transform: translateY(-1px); border-color:#d1d5db; }
+.hp .h-sub{
+  margin:18px auto 0;
+  max-width:740px;
+  color:var(--muted);
+  font-size:17px;
+  line-height:1.7;
+}
+.hp .hero-points{
+  margin:24px 0 0;
+  padding:0;
+  list-style:none;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.hp .hero-points li{
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.95);
+  color:var(--text);
+  font-size:14px;
+  font-weight:600;
+}
 
-/* Sections */
-.mp-home .section { margin-top: 22px; }
-.mp-home .section-title{
+/* Search */
+.hp .search{
+  width:100%;
+  max-width:620px;
+  margin:26px auto 0;
+  display:flex;
+  gap:10px;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#fff;
+  box-shadow:0 10px 26px rgba(32,43,67,.06);
+}
+.hp .search input{
+  flex:1;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  padding:13px 16px;
+  color:var(--text);
+  font-size:15px;
+}
+.hp .search input::placeholder{
+  color:#98A1B3;
+}
+.hp .search button{
+  border:0;
+  border-radius:999px;
+  padding:13px 20px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.hp .search button:hover{
+  background:var(--accent-dark);
+  transform:translateY(-1px);
+}
+
+/* Hero actions */
+.hp .hero-actions{
+  margin-top:18px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.hp .btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  border-radius:999px;
+  padding:13px 20px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  font-weight:700;
+  transition:.18s ease;
+}
+.hp .btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 20px rgba(32,43,67,.06);
+}
+.hp .btn.primary{
+  background:var(--accent);
+  color:#fff;
+  border-color:transparent;
+}
+.hp .btn.primary:hover{
+  background:var(--accent-dark);
+}
+
+/* ===== SECTION ===== */
+.hp .section{
+  margin-top:30px;
+}
+.hp .hrow{
   display:flex;
   justify-content:space-between;
-  align-items:flex-end;
-  gap: 10px;
-  margin: 0 0 12px;
+  align-items:end;
+  gap:12px;
+  margin-bottom:14px;
 }
-.mp-home .section-title h2{
+.hp .hrow h2{
   margin:0;
-  font-size: 20px;
-  font-weight: 600;          /* было 900 */
-  color: var(--text);
-  letter-spacing: -.2px;
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:-.02em;
+  color:var(--text);
 }
-.mp-home .section-title .hint{ color: var(--muted); font-size: 13px; }
+.hp .section-sub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.5;
+}
+.hp .hint a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:700;
+}
+.hp .hint a:hover{
+  text-decoration:underline;
+}
 
-/* Cards grid */
-.mp-home .grid{
+/* ===== INFO CARDS ===== */
+.hp .info-grid{
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns:repeat(12, 1fr);
+  gap:14px;
+}
+.hp .info-card{
+  grid-column:span 4;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  padding:20px;
+}
+.hp .info-k{
+  color:var(--accent);
+  font-size:13px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.hp .info-h{
+  margin-top:10px;
+  font-size:20px;
+  font-weight:700;
+  color:var(--text);
+}
+.hp .info-d{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.65;
 }
 
-.mp-home .p-card{
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
+/* ===== PRODUCTS ===== */
+.hp .grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:16px;
+}
+.hp .p-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:20px;
   overflow:hidden;
-  transition:.18s;
   display:flex;
   flex-direction:column;
-  min-height: 350px;
+  min-height:355px;
+  box-shadow:0 10px 24px rgba(32,43,67,.05);
+  transition:.18s ease;
 }
-.mp-home .p-card:hover{
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(0,0,0,.08);
-  border-color:#d1d5db;
+.hp .p-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 16px 34px rgba(32,43,67,.08);
 }
-.mp-home .p-media{
-  position:relative;
-  height: 185px;
-  background: #f8fafc;
+.hp .p-media{
+  height:200px;
+  background:linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%);
   display:flex;
   align-items:center;
   justify-content:center;
+  padding:12px;
 }
-.mp-home .p-media img{
+.hp .p-media img{
   width:100%;
   height:100%;
-  object-fit: contain;
+  object-fit:contain;
 }
-.mp-home .badge-hit{
-  position:absolute;
-  top: 12px; left: 12px;
-  background: #fff;
-  border: 1px solid rgba(255,106,0,.25);
-  color: var(--brand);
-  font-weight: 500;         /* было 900 */
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-
-.mp-home .p-body{
-  padding: 12px 14px 14px;
+.hp .p-body{
+  padding:14px;
   display:flex;
   flex-direction:column;
-  gap: 8px;
+  gap:8px;
   flex:1;
 }
-.mp-home .p-name{
-  font-weight: 500;         /* было 800 */
-  font-size: 14px;
-  color: var(--text);
-  line-height: 1.25;
-  min-height: 36px;
+.hp .p-name{
+  font-size:15px;
+  line-height:1.35;
+  font-weight:700;
+  color:var(--text);
+  min-height:40px;
 }
-.mp-home .p-meta{
+.hp .p-meta{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   gap:10px;
-  color: var(--muted);
-  font-size: 12px;
+  color:var(--muted);
+  font-size:12px;
 }
-.mp-home .p-price{
-  font-size: 18px;
-  font-weight: 600;         /* было 950 */
-  color: var(--text);
-  letter-spacing: -.2px;
+.hp .p-price{
+  font-size:20px;
+  font-weight:800;
+  color:var(--text);
 }
-.mp-home .p-actions{
+.hp .p-actions{
   margin-top:auto;
   display:flex;
-  gap: 10px;
+  gap:10px;
   align-items:center;
 }
-
-.mp-home .btn-detail{
+.hp .btn-detail{
   flex:1;
-  border: 1px solid var(--line);
-  background:#fff;
-  border-radius: 999px;
-  padding: 9px 12px;
-  font-weight: 500;         /* было 900 */
-  text-decoration:none;
-  color: var(--text);
   text-align:center;
-  transition:.15s;
+  text-decoration:none;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:10px 12px;
+  background:#fff;
+  color:var(--text);
+  font-weight:700;
+  transition:.18s ease;
 }
-.mp-home .btn-detail:hover{ transform: translateY(-1px); border-color:#d1d5db; }
-
-.mp-home .btn-cart{
-  width: 44px; height: 40px; /* чуть компактнее */
+.hp .btn-detail:hover{
+  box-shadow:0 8px 18px rgba(32,43,67,.06);
+}
+.hp .btn-cart{
+  width:46px;
+  height:42px;
   border:0;
-  border-radius: 999px;
-  background: var(--brand);
+  border-radius:999px;
+  background:var(--accent);
   color:#fff;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  transition:.15s;
+  transition:.18s ease;
 }
-.mp-home .btn-cart:hover{ transform: translateY(-1px); filter: brightness(.96); }
+.hp .btn-cart:hover{
+  background:var(--accent-dark);
+  transform:translateY(-1px);
+}
+.hp .btn-cart svg{
+  width:22px;
+  height:22px;
+}
+.hp .btn-cart svg path,
+.hp .btn-cart svg circle{
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
 
-/* Advantages */
-.mp-home .advantages{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
+/* ===== TRUST / FAQ ===== */
+.hp .faq{
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  overflow:hidden;
 }
-.mp-home .adv{
-  background:#fff;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px;
-  display:flex;
-  gap: 12px;
-  align-items:flex-start;
+.hp details{
+  padding:14px 16px;
+  border-top:1px solid var(--line);
 }
-.mp-home .adv-ico{
-  width: 44px; height: 44px;
-  border-radius: 16px;
-  background: rgba(255,106,0,.10);
+.hp details:first-child{
+  border-top:0;
+}
+.hp summary{
+  cursor:pointer;
+  list-style:none;
   display:flex;
+  justify-content:space-between;
   align-items:center;
-  justify-content:center;
-  font-size: 20px;
+  gap:10px;
+  font-weight:700;
+  color:var(--text);
 }
-.mp-home .adv h3{ margin:0; font-size: 14px; font-weight: 600; color: var(--text); } /* было 950 */
-.mp-home .adv p{ margin:4px 0 0; font-size: 13px; color: var(--muted); }
+.hp summary::-webkit-details-marker{
+  display:none;
+}
+.hp .ans{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.65;
+}
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 900px){
-  .mp-home .hero-inner{ grid-template-columns: 1fr; }
-  .mp-home .hero h1{ font-size: 30px; }
+  .hp .info-card{ grid-column:span 6; }
 }
-@media (max-width: 520px){
-  .mp-home .search{ flex-direction: column; border-radius: 16px; }
-  .mp-home .search button{ width:100%; }
+@media (max-width: 560px){
+  .hp .info-card{ grid-column:span 12; }
+  .hp .hero-in{ padding:48px 18px; }
+  .hp .search{
+    flex-direction:column;
+    border-radius:18px;
+  }
+  .hp .search button{
+    width:100%;
+  }
 }
-
-
-
-/* FIX Font Awesome inside mp-home (после reset'а) */
-.mp-home i.fa-solid,
-.mp-home i.fas {
-  font-weight: 900 !important;
-}
-
 </style>
 
-
-<div class="mp-home">
+<div class="hp">
   <div class="wrap">
 
-    <!-- HERO -->
     <section class="hero">
-      <div class="hero-inner">
-        <div>
-          <h1>Товары для <span class="accent">уюта</span> и атмосферы</h1>
-          <p>Свечи, декор и подарки — всё, что делает дом тёплым. Быстро найди нужное через поиск или категории.</p>
+      <div class="hero-in">
+        <div class="hero-box">
+          <div class="eyebrow">Зазеркалье</div>
 
+          <h1 class="h-title">
+            Предметы для <span class="a">дома</span>, уюта и
+            внимательных подарков
+          </h1>
+
+          <div class="h-sub">
+            Мы собрали ассортимент, который помогает создавать тёплую и гармоничную атмосферу в доме:
+            свечи, интерьерный декор и подарочные решения для повседневных и особых случаев.
+          </div>
+
+          
           <form class="search" method="get" action="{% url 'catalog:product_list' %}">
-            {% if current_category %}
-              <input type="hidden" name="category" value="{{ current_category.slug }}">
-            {% endif %}
-            <input type="text" name="q" placeholder="Поиск: свечи, диффузоры, декор…" value="{{ request.GET.q|default_if_none:'' }}">
+            <input
+              type="text"
+              name="q"
+              placeholder="Поиск по каталогу: свечи, декор, подарки…"
+              value="{{ request.GET.q|default_if_none:'' }}"
+            >
             <button type="submit">Найти</button>
           </form>
 
           <div class="hero-actions">
-            <a href="/catalog/" class="btn-solid">Перейти в каталог →</a>
-            {% if current_category or request.GET.q %}
-              <a href="{% url 'catalog:product_list' %}" class="btn-soft">Сбросить фильтры</a>
-            {% else %}
-              <a href="#hits" class="btn-soft">Смотреть хиты</a>
-            {% endif %}
+            <a href="{% url 'catalog:product_list' %}" class="btn primary">Перейти в каталог</a>
+            <a href="#featured" class="btn">Смотреть новинки</a>
           </div>
         </div>
-
-        
       </div>
     </section>
 
-    
+    <section class="section">
+      <div class="hrow">
+        <div>
+          <h2>Почему выбирают нас</h2>
+          <div class="section-sub">Спокойный и понятный сервис без лишней сложности.</div>
+        </div>
+      </div>
 
-    <!-- ХИТЫ -->
-    <section class="section" id="hits">
-      <div class="section-title">
-        <h2>Хиты продаж</h2>
-        <div class="hint"><a href="/catalog/" style="color:#6b7280;text-decoration:none;">Все товары →</a></div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-k">Ассортимент</div>
+          <div class="info-h">Товары для дома и атмосферы</div>
+          <div class="info-d">
+            В каталоге собраны позиции, которые подходят для личного пользования, оформления интерьера и подарков.
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-k">Оформление</div>
+          <div class="info-h">Понятный заказ</div>
+          <div class="info-d">
+            Вы можете быстро подобрать нужный товар, добавить его в корзину и оформить покупку в несколько шагов.
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-k">Доставка</div>
+          <div class="info-h">Удобные службы доставки</div>
+          <div class="info-d">
+            Доставка осуществляется через Яндекс Маркет, СДЭК, Ozon и Почту России в зависимости от выбранного способа.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="featured">
+      <div class="hrow">
+        <div>
+          <h2>Новинки каталога</h2>
+          <div class="section-sub">Актуальные позиции, недавно добавленные в ассортимент.</div>
+        </div>
+        <div class="hint"><a href="{% url 'catalog:product_list' %}">Все товары →</a></div>
       </div>
 
       <div class="grid">
         {% for product in featured_products %}
           <div class="p-card">
             <div class="p-media">
-              <span class="badge-hit">Хит</span>
               {% if product.images.first %}
                 <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
               {% else %}
@@ -327,11 +501,13 @@
               <div class="p-name">{{ product.name }}</div>
 
               <div class="p-meta">
-  {% if product.rating_count %}
-    <div>★ {{ product.rating_avg|floatformat:1 }} ({{ product.rating_count }})</div>
-  {% endif %}
-  <div>В наличии</div>
-</div>
+                {% if product.rating_count %}
+                  <span>★ {{ product.rating_avg|floatformat:1 }} ({{ product.rating_count }})</span>
+                {% else %}
+                  <span>&nbsp;</span>
+                {% endif %}
+                <span>В наличии</span>
+              </div>
 
               <div class="p-price">{{ product.price }} ₽</div>
 
@@ -340,14 +516,14 @@
 
                 <form method="post" action="{% url 'orders:cart_add' product.id %}" class="js-add-to-cart">
                   {% csrf_token %}
-                  <button class="btn-cart" aria-label="Добавить в корзину">
-  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M6 6h15l-2 8H8L6 6Z" />
-    <path d="M6 6 5 3H2" />
-    <circle cx="9" cy="20" r="1.5" />
-    <circle cx="18" cy="20" r="1.5" />
-  </svg>
-</button>
+                  <button type="submit" class="btn-cart" aria-label="Добавить в корзину">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M6 6h15l-2 8H8L6 6Z"></path>
+                      <path d="M6 6 5 3H2"></path>
+                      <circle cx="9" cy="20" r="1.5"></circle>
+                      <circle cx="18" cy="20" r="1.5"></circle>
+                    </svg>
+                  </button>
                 </form>
               </div>
             </div>
@@ -356,38 +532,45 @@
       </div>
     </section>
 
-    <!-- ПЛЮСЫ -->
     <section class="section">
-      <div class="section-title">
-        <h2>Почему мы</h2>
-        
+      <div class="hrow">
+        <div>
+          <h2>Информация о покупке</h2>
+          <div class="section-sub">Основные условия заказа, оплаты и доставки.</div>
+        </div>
       </div>
 
-      <div class="advantages">
-        <div class="adv">
-          <div class="adv-ico">⭐</div>
-          <div>
-            <h3>Проверенное качество</h3>
-            <p>Отборные материалы и аккуратная упаковка.</p>
+      <div class="faq">
+        <details>
+          <summary>Оплата <span style="color:#9b93a8;">+</span></summary>
+          <div class="ans">
+            В настоящий момент оплата производится при оформлении заказа на сайте.
+            Мы работаем над добавлением дополнительных вариантов оплаты, чтобы сделать процесс покупки ещё удобнее.
           </div>
-        </div>
-        <div class="adv">
-          <div class="adv-ico">🚚</div>
-          <div>
-            <h3>Быстрая доставка</h3>
-            <p>Собираем и отправляем без задержек.</p>
+        </details>
+
+        <details>
+          <summary>Доставка <span style="color:#9b93a8;">+</span></summary>
+          <div class="ans">
+            Доставка заказов осуществляется следующими службами:<br><br>
+            — Яндекс Доставка (в пункты выдачи Яндекс Маркет)<br>
+            — СДЭК<br>
+            — Ozon<br>
+            — Почта России
           </div>
-        </div>
-        <div class="adv">
-          <div class="adv-ico">🎁</div>
-          <div>
-            <h3>Идеи для подарков</h3>
-            <p>Подборки под повод и готовые наборы.</p>
+        </details>
+
+        <details>
+          <summary>Возврат и вопросы по заказу <span style="color:#9b93a8;">+</span></summary>
+          <div class="ans">
+            Если товар не подошёл или был повреждён при доставке, вы можете уточнить условия возврата
+            на соответствующей странице сайта или обратиться в чат поддержки.
           </div>
-        </div>
+        </details>
       </div>
     </section>
 
   </div>
 </div>
+
 {% endblock %}

@@ -1,0 +1,39 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Главная</h3>
+
+<div class="row g-3">
+  <div class="col-md-3">
+    <div class="card p-3">
+      <div class="muted">Товары</div>
+      <div style="font-size:28px;font-weight:700;">{{ total_products }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3">
+      <div class="muted">Категории</div>
+      <div style="font-size:28px;font-weight:700;">{{ total_categories }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3">
+      <div class="muted">Заказы</div>
+      <div style="font-size:28px;font-weight:700;">{{ total_orders }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3">
+      <div class="muted">Оплачено</div>
+      <div style="font-size:28px;font-weight:700;">{{ paid_orders }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3 mt-3">
+  <div class="muted">Выручка</div>
+  <div style="font-size:22px;font-weight:700;">{{ revenue|default:"—" }}</div>
+</div>
+
+{% endblock %}

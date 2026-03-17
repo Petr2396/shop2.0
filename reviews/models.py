@@ -24,5 +24,9 @@ class Review(models.Model):
         unique_together = ("product", "user")  # 1 отзыв на товар от 1 пользователя
         ordering = ("-created_at",)
 
+    class Meta:
+        verbose_name = "Отзывы"
+        verbose_name_plural = "Отзывы"
+
     def __str__(self):
         return f"{self.product} — {self.rating}"

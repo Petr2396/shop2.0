@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Данные получателя{% endblock %}
+{% block content %}
+
+<div class="container" style="max-width:720px;margin:22px auto;">
+  <div style="border:1px solid #e5e7eb;border-radius:16px;padding:16px;background:#fff;">
+    <h3 style="margin:0 0 6px;font-weight:600;">Нужны данные получателя</h3>
+    <div style="color:#6b7280;font-size:13px;margin-bottom:12px;">
+      Чтобы оформить заказ, заполни имя и телефон. Адрес ты укажешь на следующем шаге.
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="profile_required" value="1">
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Имя *</label>
+          {{ profile_form.first_name }}
+          {% if profile_form.first_name.errors %}
+            <div class="text-danger small">{{ profile_form.first_name.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Фамилия</label>
+          {{ profile_form.last_name }}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Телефон *</label>
+          {{ profile_form.phone }}
+          {% if profile_form.phone.errors %}
+            <div class="text-danger small">{{ profile_form.phone.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <button type="submit"
+        class="btn"
+        style="margin-top:14px;background:#ff6a00;color:#fff;border-radius:999px;padding:10px 14px;border:0;">
+        Сохранить и продолжить
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

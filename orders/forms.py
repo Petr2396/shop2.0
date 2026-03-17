@@ -19,7 +19,15 @@ class OrderCreateForm(forms.ModelForm):
     
    
     
-    
+class CheckoutProfileForm(forms.Form):
+    first_name = forms.CharField(label="Имя", max_length=50, required=True)
+    last_name = forms.CharField(label="Фамилия", max_length=50, required=False)
+    phone = forms.CharField(label="Телефон", max_length=255, required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in self.fields.values():
+            f.widget.attrs.setdefault("class", "form-control") 
     
     
 

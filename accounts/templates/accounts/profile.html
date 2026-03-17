@@ -3,171 +3,284 @@
 
 {% block content %}
 <style>
-/* ===== Profile page (scoped) ===== */
-.pf { --brand:#ff6a00; --text:#111827; --muted:#6b7280; --line:#e5e7eb; --bg:#f8fafc; }
-.pf, .pf * { font-weight: 400; }
-
-.pf .wrap{ max-width: 980px; margin: 0 auto; padding: 18px 14px 48px; }
-
-.pf .cardx{
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius: 18px;
-  overflow:hidden;
-  box-shadow: 0 14px 30px rgba(0,0,0,.06);
+.pf{
+  --surface:#FFFFFF;
+  --surface-2:#F8F6FC;
+  --surface-3:#F4F1FA;
+  --accent:#7C69A7;
+  --accent-dark:#68558F;
+  --accent-soft:rgba(124,105,167,.10);
+  --text:#262330;
+  --muted:#7C768C;
+  --line:#E8E3F1;
+  --line-strong:#D9D0E8;
+  --shadow-sm:0 10px 24px rgba(54,42,84,.06);
+  --shadow-md:0 16px 34px rgba(54,42,84,.08);
+  --shadow-lg:0 20px 46px rgba(54,42,84,.10);
 }
 
+.pf,
+.pf *{
+  box-sizing:border-box;
+}
+
+.pf .wrap{
+  max-width:980px;
+  margin:0 auto;
+  padding:18px 14px 48px;
+}
+
+.pf .cardx{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:var(--shadow-md);
+}
+
+/* header */
 .pf .head{
-  padding: 18px 18px 14px;
+  padding:20px 22px 16px;
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(255,106,0,.06), rgba(255,106,0,0));
-}
-.pf .title{
-  margin:0;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -.2px;
-}
-.pf .sub{
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 13px;
+  gap:12px;
+  border-bottom:1px solid var(--line);
+  background:
+    radial-gradient(560px 180px at 10% 0%, rgba(124,105,167,.08), transparent 55%),
+    linear-gradient(180deg, #fff 0%, #faf8fd 100%);
 }
 
-.pf .body{ padding: 18px; }
+.pf .title{
+  margin:0;
+  font-size:32px;
+  line-height:1.08;
+  font-weight:900;
+  letter-spacing:-.03em;
+  color:var(--text);
+}
+
+.pf .sub{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.6;
+}
+
+/* body */
+.pf .body{
+  padding:22px;
+}
 
 .pf .top{
   display:grid;
-  grid-template-columns: 140px 1fr;
-  gap: 16px;
+  grid-template-columns:140px 1fr;
+  gap:18px;
   align-items:center;
-  margin-bottom: 14px;
+  margin-bottom:18px;
 }
 
 .pf .avatar{
-  width: 120px;
-  height: 120px;
-  border-radius: 999px;
+  width:124px;
+  height:124px;
+  border-radius:999px;
   overflow:hidden;
-  border: 1px solid var(--line);
-  background: var(--bg);
+  border:1px solid var(--line);
+  background:linear-gradient(180deg, #fff 0%, #f7f4fc 100%);
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow: 0 10px 20px rgba(0,0,0,.06);
+  box-shadow:var(--shadow-sm);
 }
+
 .pf .avatar img{
   width:100%;
   height:100%;
-  object-fit: cover;
+  object-fit:cover;
   display:block;
 }
 
 .pf .name{
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0;
-}
-.pf .meta{
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 13px;
+  margin:0;
+  font-size:22px;
+  line-height:1.2;
+  font-weight:900;
+  letter-spacing:-.02em;
+  color:var(--text);
 }
 
+.pf .meta{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+}
+
+.pf .meta strong{
+  color:var(--text);
+  font-weight:800;
+}
+
+/* info grid */
 .pf .grid{
   display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 14px;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:18px;
 }
 
 .pf .field{
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 12px 14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px 15px;
   background:#fff;
-}
-.pf .label{
-  color: var(--muted);
-  font-size: 12px;
-  margin-bottom: 6px;
-}
-.pf .value{
-  color: var(--text);
-  font-size: 14px;
+  box-shadow:0 6px 16px rgba(54,42,84,.03);
 }
 
+.pf .label{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:7px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+.pf .value{
+  color:var(--text);
+  font-size:15px;
+  line-height:1.5;
+  font-weight:800;
+  word-break:break-word;
+}
+
+/* actions */
 .pf .actions{
   display:flex;
-  gap: 10px;
+  gap:10px;
   flex-wrap:wrap;
-  margin-top: 16px;
+  margin-top:20px;
 }
 
 .pf .btnx{
   display:inline-flex;
   align-items:center;
-  gap: 8px;
-  border-radius: 999px;
-  padding: 9px 12px;
+  justify-content:center;
+  gap:8px;
+  min-height:46px;
+  padding:0 16px;
   text-decoration:none;
-  border: 1px solid var(--line);
+  border:1px solid var(--line);
+  border-radius:999px;
   background:#fff;
-  color: var(--text);
-  font-weight: 500;
-  transition: .15s;
+  color:var(--text);
+  font-size:14px;
+  font-weight:800;
+  transition:.18s ease;
 }
-.pf .btnx:hover{ transform: translateY(-1px); border-color:#d1d5db; }
+
+.pf .btnx:hover{
+  transform:translateY(-1px);
+  border-color:var(--line-strong);
+  background:var(--surface-2);
+  color:var(--accent);
+}
 
 .pf .btnx.primary{
-  background: var(--brand);
-  border-color: var(--brand);
+  background:var(--accent);
+  border-color:var(--accent);
   color:#fff;
-  box-shadow: 0 10px 20px rgba(255,106,0,.18);
+  box-shadow:0 12px 24px rgba(124,105,167,.20);
 }
-.pf .btnx.primary:hover{ filter: brightness(.97); }
 
+.pf .btnx.primary:hover{
+  background:var(--accent-dark);
+  border-color:var(--accent-dark);
+  color:#fff;
+}
+
+/* footer */
 .pf .foot{
-  padding: 12px 18px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 12px;
+  padding:14px 22px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:13px;
   display:flex;
   justify-content:space-between;
-  gap: 10px;
+  gap:10px;
   flex-wrap:wrap;
+  background:#fcfbfe;
 }
 
-/* SVG icons */
+/* icons */
 .pf .icon{
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width:18px;
+  height:18px;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
   display:inline-block;
 }
 
 .pf .icon-fill{
-  width: 46px;
-  height: 46px;
-  fill: #9ca3af; /* серый */
+  width:52px;
+  height:52px;
+  fill:#b2a9c5;
   display:inline-block;
 }
 
 /* mobile */
-@media (max-width: 720px){
-  .pf .top{ grid-template-columns: 1fr; justify-items:center; text-align:center; }
-  .pf .grid{ grid-template-columns: 1fr; }
-  .pf .foot{ justify-content:center; }
+@media (max-width:720px){
+  .pf .wrap{
+    padding:12px 0 34px;
+  }
+
+  .pf .cardx{
+    border-radius:22px;
+  }
+
+  .pf .head{
+    padding:18px 18px 14px;
+  }
+
+  .pf .title{
+    font-size:28px;
+  }
+
+  .pf .sub{
+    font-size:14px;
+  }
+
+  .pf .body{
+    padding:18px;
+  }
+
+  .pf .top{
+    grid-template-columns:1fr;
+    justify-items:center;
+    text-align:center;
+    gap:14px;
+  }
+
+  .pf .grid{
+    grid-template-columns:1fr;
+  }
+
+  .pf .actions{
+    flex-direction:column;
+  }
+
+  .pf .btnx{
+    width:100%;
+  }
+
+  .pf .foot{
+    justify-content:center;
+    text-align:center;
+    padding:14px 18px;
+  }
 }
 </style>
 
@@ -189,7 +302,6 @@
             {% if profile.avatar %}
               <img src="{{ profile.avatar.url }}" alt="Аватар">
             {% else %}
-              <!-- default avatar icon (SVG, без FA) -->
               <svg class="icon-fill" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="8.2" r="3.6" />
                 <path d="M5 20c0-3.6 3.2-5.8 7-5.8s7 2.2 7 5.8" />
@@ -206,7 +318,7 @@
               {% endif %}
             </p>
             <div class="meta">
-              Email: {{ user.email|default:"—" }}
+              <strong>Email:</strong> {{ user.email|default:"—" }}
             </div>
           </div>
         </div>
@@ -235,7 +347,6 @@
 
         <div class="actions">
           <a href="{% url 'orders:my_orders' %}" class="btnx primary">
-            <!-- box icon -->
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M21 8 12 3 3 8l9 5 9-5Z"/>
               <path d="M3 8v10l9 5 9-5V8"/>
@@ -245,7 +356,6 @@
           </a>
 
           <a href="{% url 'accounts:edit_profile' %}" class="btnx">
-            <!-- pen icon -->
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 20h9"/>
               <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"/>
@@ -258,7 +368,7 @@
 
       <div class="foot">
         <div>Последний вход: {{ user.last_login|date:"d.m.Y H:i"|default:"—" }}</div>
-        <div style="color:#9ca3af;">Огонь Жизни</div>
+        <div>Аккаунт</div>
       </div>
 
     </div>

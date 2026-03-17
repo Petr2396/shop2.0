@@ -9,17 +9,25 @@ from django.views.decorators.http import require_GET
 
 
 def product_list(request):
-    products = Product.objects.all()
+    products = Product.objects.filter(is_active=True, stock__gt=0)
 
     category_slug = request.GET.get("category")
     query = request.GET.get("q")
+    category = None
 
-    # Фильтрация по категории
+    # Фильтрация по категории / подкатегории
     if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
-        products = products.filter(category=category)
-    else:
-        category = None
+
+        # если это родительская категория — показываем и её товары, и товары её подкатегорий
+        if category.parent is None:
+            child_ids = category.children.values_list("id", flat=True)
+            products = products.filter(
+                Q(category=category) | Q(category_id__in=child_ids)
+            )
+        else:
+            # если это подкатегория — только её товары
+            products = products.filter(category=category)
 
     # Поиск
     if query:
@@ -27,27 +35,26 @@ def product_list(request):
             Q(name__icontains=query) | Q(description__icontains=query)
         )
 
-    # ✅ Добавляем рейтинги (среднее и кол-во отзывов) к каждому товару
+    # Рейтинги
     products = products.annotate(
         rating_avg=Avg("reviews__rating"),
         rating_count=Count("reviews")
     )
 
-    # Категории для меню
-    categories = Category.objects.all()
+    # В sidebar только родительские категории + сразу их подкатегории
+    categories = Category.objects.filter(parent__isnull=True).prefetch_related("children")
 
     return render(request, "catalog/product_list.html", {
         "products": products,
         "query": query,
         "categories": categories,
-        "current_category": category
+        "current_category": category,
     })
-
 
 def product_detail(request, slug):
     # ✅ Берём товар + сразу считаем рейтинг
     product = get_object_or_404(
-        Product.objects.annotate(
+         Product.objects.filter(is_active=True, stock__gt=0).annotate(
             rating_avg=Avg("reviews__rating"),
             rating_count=Count("reviews")
         ),
